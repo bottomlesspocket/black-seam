@@ -115,6 +115,9 @@ body.holding #holding{display:block}
 @media (max-width:640px){.purse{top:calc(clamp(16px,4vh,40px) + 54px)}.tools{gap:6px}.chapter{top:calc(clamp(16px,4vh,40px) + 74px)}.chapter h1{font-size:24px}.chapter p{font-size:14px}}
 @media (max-width:640px){.hint{display:none}.pin em{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+#ov .gate{text-align:center;cursor:pointer}#ov .gate .pulse{letter-spacing:.2em;text-transform:uppercase;font-size:12px;color:var(--gold,#e9b86a);animation:gatePulse 2.4s ease-in-out infinite}
+@keyframes gatePulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){#ov .gate .pulse{animation:none}}
 </style>
 </head>
 <body>
@@ -1885,7 +1888,15 @@ async function intro(){
  await say('So I’m Mr Crane of the Ordnance Survey, the government’s map-makers. A Survey man can walk any field in Wales measuring hedges, and nobody asks him why.');
  await say('First, a bed in the village. Then Bevan’s daughter, Gwen. She owns Pen-y-graig now.');
  await say('If her father ever told her about the coal, she’ll never sell to me. I need to find out what she knows.');bump('pocket')}
+/* sound must be playing before the intro paragraph shows. If the click that opened the chapter
+   was enough for the browser, go straight on; if not, ask for a click first and start the sound with it */
 function titleCard(cont){
+ audio.start();ov.innerHTML='';ov.classList.add('on');
+ setTimeout(()=>{if(audio.running){syncSnd();introCard(cont);return}
+  ov.innerHTML=`<div class="card gate"><small>Black Seam · Act 1</small><h1>Welcome to Act 1</h1><p class="pulse">Click anywhere to begin</p></div>`;
+  const go=e=>{if(e){e.preventDefault();e.stopPropagation()}ov.removeEventListener('click',go);removeEventListener('keydown',go,true);audio.start();syncSnd();introCard(cont)};
+  ov.addEventListener('click',go);addEventListener('keydown',go,true)},250)}
+function introCard(cont){
  ov.innerHTML=`<div class="card"><small>Black Seam · Act 1</small><h1>The survey</h1><p>Glamorgan, September 1869. Elias Crane gets off the Taff Vale train at Cwm Du as “Mr Crane of the Ordnance Survey”, carrying a theodolite, a forged letter and Josiah Bevan’s notebook.</p><div class="row"><button class="btn" id="go">${cont?'Continue':'Begin'}</button>${cont?'<button class="btn" id="restart">Start again</button>':''}</div><p style="font-size:15px">Click or tap to walk and to use things. Hold space, or the magnifier on touch screens, to show what you can interact with.</p></div>`;
  ov.classList.add('on');audio.start();syncSnd();
  document.getElementById('go').onclick=()=>{ov.classList.remove('on');audio.start();syncSnd();if(!cont)run(intro)};
@@ -2023,7 +2034,7 @@ const audio=(()=>{
   for(let i=0;i<26;i++){const dash=Math.random()<.4,len=dash?.18:.07;click(t,1);click(t+len,.6);t+=len+.08+(i%5===4?.25:0)}}
  function whistle(){if(!ac)return;const t=ac.currentTime+.1;for(const f of[740,880,1110]){const o=ac.createOscillator();o.type='sawtooth';o.frequency.value=f;const lp=ac.createBiquadFilter();lp.type='bandpass';lp.frequency.value=f;lp.Q.value=4;const g=G_(master);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+.08);g.gain.setValueAtTime(.05,t+1.4);g.gain.linearRampToValueAtTime(0,t+1.8);o.connect(lp);lp.connect(g);o.start(t);o.stop(t+2)}}
  function setMuted(m){muted=m;if(!ac)return;const g=master.gain,now=ac.currentTime;g.cancelScheduledValues(now);g.setValueAtTime(g.value,now);g.linearRampToValueAtTime(m?0:.85,now+.4)}
- return{start,scene,whistle,telegraph,setMuted,get started(){return started},get muted(){return muted}}})();
+ return{start,scene,whistle,telegraph,setMuted,get started(){return started},get muted(){return muted},get running(){return !!ac&&ac.state==='running'}}})();
 const sndBtn=document.getElementById('snd');
 function syncSnd(){const on=audio.started&&!audio.muted;sndBtn.classList.toggle('muted',!on);sndBtn.querySelector('.tip').textContent=on?'Sound on':'Sound off'}
 sndBtn.addEventListener('click',e=>{e.stopPropagation();if(!audio.started)audio.start();else audio.setMuted(!audio.muted);syncSnd()});
