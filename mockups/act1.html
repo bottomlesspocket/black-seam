@@ -841,8 +841,20 @@ function haltBg(t,dt){
  ctx.fillStyle='#5a4a38';for(let x=20;x<380;x+=26)ctx.fillRect(x,672,7,70);ctx.fillRect(10,684,380,7);ctx.fillRect(10,714,380,7);
  for(const[x,k]of[[262,1],[300,.95],[334,1]]){ctx.save();ctx.translate(x,800);ctx.scale(k,k);rimFill(P(p=>{p.moveTo(-16,0);p.lineTo(-16,-40);p.quadraticCurveTo(-16,-50,-9,-54);p.lineTo(-9,-64);p.lineTo(9,-64);p.lineTo(9,-54);p.quadraticCurveTo(16,-50,16,-40);p.lineTo(16,0);p.closePath()}),'#9a9a94','#e0e0d8',-2,1);ctx.fillStyle='#6a6a64';ctx.fillRect(-12,-68,24,5);ctx.fillRect(-16,-22,32,3);ctx.restore()}
  ctx.save();ctx.translate(260,0);
- /* bench */
- ctx.fillStyle='#4a3424';ctx.fillRect(930,786,170,10);ctx.fillRect(930,760,170,8);ctx.fillRect(940,796,8,26);ctx.fillRect(1082,796,8,26);
+ /* bench: slatted seat and back on three cast-iron ends with scrolled arms */
+ {const IR='#1c1814',W='#6a4a30',WL='#a07850';
+  ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(1015,822,92,6,0,0,Math.PI*2);ctx.fill();
+  /* back slats, behind the ironwork */
+  for(const y of[746,756,766]){ctx.fillStyle=W;ctx.fillRect(932,y,166,7);ctx.fillStyle=WL;ctx.fillRect(932,y,166,1.5)}
+  /* the iron ends: back post, arm with a curl, and legs splayed to the platform */
+  for(const x of[938,1015,1092]){const end=x!==1015,o=x<1015?-1:1;
+   ctx.fillStyle=IR;ctx.fillRect(x-3,740,6,48);
+   ctx.beginPath();ctx.moveTo(x-4,796);ctx.lineTo(x+4,796);ctx.lineTo(x+7,822);ctx.lineTo(x-7,822);ctx.closePath();ctx.fill();
+   ctx.fillRect(x-9,819,18,3);
+   if(end){ctx.fillRect(Math.min(x,x+o*12),772,12,4);ctx.strokeStyle=IR;ctx.lineWidth=3;ctx.beginPath();ctx.arc(x+o*12,780,5,-Math.PI/2,Math.PI/2,o<0);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x+o*12,785);ctx.quadraticCurveTo(x+o*6,792,x,796);ctx.stroke()}}
+  /* seat slats, in front of the ironwork */
+  for(const y of[784,791]){ctx.fillStyle=W;ctx.fillRect(928,y,174,6);ctx.fillStyle=WL;ctx.fillRect(928,y,174,1.5)}}
  if(!G.night)drawStationmaster(t);
  if(F('vaneTrain')&&trainX<=901)person(1180,800,.95,Object.assign({flip:1},FIG.vane),t);
  ctx.restore()}
