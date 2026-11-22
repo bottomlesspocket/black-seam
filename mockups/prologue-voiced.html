@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[voiced] Black Seam Prologue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500&display=swap">
+<style>
+:root{--ink:#0b0705;--gold:#e9b86a;--cream:#f3e3c4;--muted:rgba(243,227,196,.62);--glass:rgba(20,12,8,.5);--line:rgba(233,184,106,.22)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--ink);overflow:hidden}
+body{font-family:Inter,system-ui,sans-serif;color:var(--cream);cursor:none}
+#stage{position:fixed;inset:0;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hud{position:absolute;inset:0;pointer-events:none}
+.chapter{position:absolute;left:clamp(16px,4vw,48px);top:clamp(16px,4vh,40px);text-shadow:0 1px 14px rgba(0,0,0,.7)}
+.chapter small{display:block;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);opacity:.85}
+.chapter h1{font-family:"Cormorant Garamond",serif;font-weight:400;font-size:clamp(26px,3.6vw,42px);line-height:1.05;margin-top:6px}
+.chapter p{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:clamp(15px,1.5vw,18px);color:var(--muted);margin-top:4px}
+.tools{position:absolute;right:clamp(16px,4vw,48px);top:clamp(16px,4vh,40px);display:flex;gap:10px;pointer-events:auto;z-index:8}
+.tool{position:relative;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--cream);transition:transform .25s,border-color .25s,background .25s;cursor:none;padding:0}
+.tool:hover,.tool.active{transform:translateY(-2px);border-color:rgba(233,184,106,.7);background:rgba(40,24,14,.7)}
+.tool svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tool .badge{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:9px;background:var(--gold);color:#2a1709;font-size:10px;font-weight:500;display:grid;place-items:center;padding:0 5px}
+.tool .badge:empty{display:none}
+.tool.bump{animation:bump .6s}
+.tool .tip{position:absolute;top:56px;right:0;white-space:nowrap;font-size:12px;padding:6px 10px;border-radius:8px;background:var(--glass);border:1px solid var(--line);opacity:0;transform:translateY(-4px);transition:.2s;pointer-events:none}
+@media (hover:hover){.tool:hover .tip{opacity:1;transform:none}}
+.tool.snd .off{display:none}.tool.snd.muted .on{display:none}.tool.snd.muted .off{display:block}.tool.snd.muted{color:var(--muted)}
+.tool.look{display:none}
+.purse{position:absolute;right:clamp(16px,4vw,48px);top:calc(clamp(16px,4vh,40px) + 58px);font-size:12px;color:var(--muted);letter-spacing:.04em;text-align:right;text-shadow:0 1px 10px rgba(0,0,0,.8)}
+.purse b{color:var(--cream);font-weight:500;font-variant-numeric:tabular-nums}
+.sub{position:absolute;left:50%;bottom:clamp(20px,6vh,56px);transform:translateX(-50%);width:min(780px,calc(100% - 32px));text-align:center;opacity:0;transition:opacity .35s;pointer-events:none}
+.sub.on{opacity:1}
+.sub .who{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;text-shadow:0 1px 8px #000}
+.sub .line{font-family:"Cormorant Garamond",serif;font-size:clamp(20px,2.4vw,28px);line-height:1.3;text-shadow:0 2px 18px rgba(0,0,0,.9),0 0 2px #000}
+.choices{display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:14px;pointer-events:auto}
+.choices button,.btn{font:inherit;font-size:14px;padding:9px 16px;border-radius:999px;border:1px solid rgba(233,184,106,.45);background:rgba(20,12,8,.72);backdrop-filter:blur(8px);color:var(--cream);cursor:none;transition:background .15s,color .15s,transform .15s;max-width:100%}
+.choices button:hover,.choices button:focus-visible,.btn:hover,.btn:focus-visible{background:var(--gold);color:#2a1709;outline:none}
+.hs{position:absolute;pointer-events:auto;cursor:none;border-radius:12px}
+.exit{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;display:grid;place-items:center;background:rgba(24,10,8,.62);border:1.5px solid rgba(220,70,56,.9);box-shadow:0 0 0 4px rgba(220,70,56,.15),0 6px 18px rgba(0,0,0,.4);pointer-events:auto;cursor:none;padding:0;z-index:4;transition:transform .2s,background .2s;animation:exitPulse 2.4s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+.exit:hover{transform:scale(1.12);background:rgba(160,36,28,.85)}
+.exit svg{width:24px;height:24px;fill:none;stroke:#ff6a58;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.exit:hover svg{stroke:#fff1e8}
+.exit.right svg{transform:rotate(180deg)}.exit.up svg{transform:rotate(90deg)}.exit.down svg{transform:rotate(-90deg)}
+@keyframes exitPulse{50%{box-shadow:0 0 0 9px rgba(220,70,56,.04),0 6px 18px rgba(0,0,0,.4)}}
+.hs::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--cream);opacity:0;transition:opacity .4s}
+body.reveal .hs::after{opacity:.6;animation:ping 2.2s infinite}
+body.busy .hs{pointer-events:none}
+.label{position:absolute;pointer-events:none;transform:translate(-50%,calc(-100% - 10px));opacity:0;transition:opacity .2s;text-align:center;white-space:nowrap;z-index:5}
+.label.on{opacity:1}
+.label .name{font-family:"Cormorant Garamond",serif;font-size:22px;line-height:1;text-shadow:0 2px 14px rgba(0,0,0,.95),0 0 3px #000}
+.label .verbs{margin-top:8px;display:none;gap:6px;justify-content:center;flex-wrap:wrap}
+.label.open{pointer-events:auto}.label.open .verbs{display:flex}
+.label .verbs button{font:inherit;font-size:13px;padding:8px 14px;border-radius:999px;background:var(--glass);border:1px solid rgba(233,184,106,.45);backdrop-filter:blur(8px);color:var(--cream);cursor:none}
+.label .verbs button:hover{color:#2a1709;background:var(--gold)}
+#cursor{position:fixed;left:0;top:0;width:28px;height:28px;margin:-14px 0 0 -14px;border:1px solid rgba(243,227,196,.75);border-radius:50%;pointer-events:none;transition:width .2s,height .2s,margin .2s,border-color .2s,background .2s;z-index:40}
+#cursor::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px;border-radius:50%;background:var(--cream)}
+#cursor.hot{width:44px;height:44px;margin:-22px 0 0 -22px;border-color:var(--gold);background:rgba(233,184,106,.08)}
+#holding{position:fixed;left:0;top:0;pointer-events:none;z-index:39;font-size:12px;padding:5px 10px;border-radius:999px;background:var(--gold);color:#2a1709;white-space:nowrap;display:none;transform:translate(22px,18px)}
+#holding.touch{left:50%;top:auto;bottom:calc(clamp(20px,6vh,56px) + 90px);transform:translateX(-50%);pointer-events:auto;font-size:13px;padding:8px 14px}
+body.holding #holding{display:block}
+.hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:11px;letter-spacing:.12em;color:rgba(243,227,196,.4);white-space:nowrap}
+.panel{position:absolute;right:clamp(16px,4vw,48px);top:calc(clamp(16px,4vh,40px) + 84px);width:min(390px,calc(100% - 32px));max-height:calc(100% - 210px);overflow:auto;background:rgba(18,11,7,.88);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:18px;pointer-events:auto;opacity:0;transform:translateY(-6px);transition:opacity .22s,transform .22s,visibility .22s;visibility:hidden;z-index:6}
+.panel.on{opacity:1;transform:none;visibility:visible}
+.panel h2{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:26px;margin-bottom:4px}
+.panel .sub2{font-size:12px;color:var(--muted);margin-bottom:14px}
+.items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--cream);font:inherit;font-size:11px;line-height:1.25;text-align:center;cursor:none;min-width:0}
+.item:hover{border-color:rgba(233,184,106,.6)}
+.item.sel{border-color:var(--gold);background:rgba(233,184,106,.14)}
+.item svg{width:40px;height:40px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.desc{margin-top:14px;font-family:"Cormorant Garamond",serif;font-size:19px;line-height:1.35}
+.btnrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.list{display:flex;flex-direction:column;gap:12px}
+.list .row b{font-family:"Cormorant Garamond",serif;font-size:19px;font-weight:500;display:block}
+.list .row span{font-size:13px;color:var(--muted);line-height:1.45}
+.goal{display:grid;grid-template-columns:18px 1fr;gap:8px;font-size:14px;line-height:1.4}
+.goal i{width:13px;height:13px;border:1px solid var(--gold);border-radius:3px;margin-top:3px}
+.goal.done{color:var(--muted)}.goal.done i{background:var(--gold)}
+.empty{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:18px;color:var(--muted)}
+.toast{position:absolute;left:50%;top:clamp(84px,12vh,120px);transform:translate(-50%,-8px);background:rgba(18,11,7,.86);border:1px solid var(--line);padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .3s,transform .3s;white-space:nowrap;z-index:7;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast b{color:var(--gold);font-weight:500}
+.overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(8,5,3,.9);opacity:0;visibility:hidden;transition:opacity .5s,visibility .5s;padding:24px 16px;cursor:auto}
+.overlay.on{opacity:1;visibility:visible}
+.overlay button{cursor:pointer}
+.card{text-align:center;max-width:620px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.card small{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
+.card h1{font-family:"Cormorant Garamond",serif;font-weight:400;font-size:clamp(40px,7vw,72px);line-height:1}
+.card p{font-family:"Cormorant Garamond",serif;font-size:clamp(18px,2.2vw,22px);line-height:1.45;color:var(--muted)}
+.card .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.card a{color:var(--gold)}
+#fade{position:fixed;inset:0;background:#050302;opacity:0;pointer-events:none;transition:opacity .7s;z-index:25;display:grid;place-items:center}
+#fade.on{opacity:1;pointer-events:auto}
+#fade p{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:clamp(20px,2.6vw,28px);color:var(--cream);opacity:.85;text-align:center;padding:0 24px;max-width:700px}
+.map{width:min(900px,100%);display:flex;flex-direction:column;gap:12px}
+.map h2{font-family:"Cormorant Garamond",serif;font-weight:400;font-size:32px;text-align:center}
+.mapbox{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#1b130d}
+.mapbox svg{position:absolute;inset:0;width:100%;height:100%}
+.pin{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:var(--cream);font:inherit;padding:6px}
+.pin i{width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(233,184,106,.25)}
+.pin span{font-family:"Cormorant Garamond",serif;font-size:clamp(14px,2vw,19px);white-space:nowrap;text-shadow:0 1px 6px #000}
+.pin em{font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap}
+.pin.here i{background:var(--cream)}
+.pin:hover span,.pin:focus-visible span{color:var(--gold)}
+.rub{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(640px,100%)}
+.rub canvas{position:relative;width:100%;height:auto;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6);touch-action:none;cursor:crosshair}
+.rub p{font-family:"Cormorant Garamond",serif;font-size:19px;color:var(--muted);text-align:center}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(243,227,196,.45)}80%,100%{box-shadow:0 0 0 14px rgba(243,227,196,0)}}
+@keyframes bump{30%{transform:scale(1.18);border-color:var(--gold)}}
+@media (pointer:coarse){.tool.look{display:grid}.tool{width:42px;height:42px}.label .verbs button{font-size:14px;padding:10px 16px}body.reveal .hs::after{opacity:.9}.hs::after{opacity:.35}}
+@media (hover:none){body{cursor:auto}#cursor{display:none}}
+@media (max-width:640px){.purse{top:calc(clamp(16px,4vh,40px) + 54px)}.tools{gap:6px}.chapter{top:calc(clamp(16px,4vh,40px) + 74px)}.chapter h1{font-size:24px}.chapter p{font-size:14px}}
+@media (max-width:640px){.hint{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="stage">
+ <canvas id="c"></canvas>
+ <div class="hud" id="hud">
+  <div class="chapter"><small>Prologue</small><h1 id="chH">Bevan’s box</h1><p id="chP">London · September 1869</p></div>
+  <div class="tools">
+   <button class="tool snd muted" id="snd" aria-label="Music"><svg class="on" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9a4 4 0 0 1 0 6"/><path d="M19 6.5a7.5 7.5 0 0 1 0 11"/></svg><svg class="off" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 10l4 4M21 10l-4 4"/></svg><span class="tip">Sound</span></button>
+   <button class="tool look" id="look" aria-label="Show hotspots"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/><path d="M11 8v6M8 11h6"/></svg><span class="tip">Show hotspots</span></button>
+   <button class="tool" data-tab="satchel" aria-label="Satchel"><svg viewBox="0 0 24 24"><path d="M4 9h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/><path d="M4 13h16"/></svg><span class="badge" id="bSatchel"></span><span class="tip">Satchel</span></button>
+   <button class="tool" data-tab="pocket" aria-label="Pocketbook"><svg viewBox="0 0 24 24"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M6 3v18"/><path d="M10 8h5M10 12h5"/></svg><span class="tip">Pocketbook · what to do</span></button>
+   <button class="tool" data-tab="ledger" aria-label="Ledger"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/><path d="M9 8h6"/></svg><span class="badge" id="bLedger"></span><span class="tip">Ledger · people</span></button>
+   <button class="tool" data-tab="secrets" aria-label="Secrets"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg><span class="badge" id="bSecrets"></span><span class="tip">Secrets</span></button>
+  </div>
+  <div class="purse" id="purse"></div>
+  <div class="panel" id="panel" role="dialog" aria-label="Notebook"></div>
+  <div class="toast" id="toast"></div>
+  <div class="sub" id="sub"><div class="who" id="who"></div><div class="line" id="line"></div><div class="choices" id="choices"></div></div>
+  <div class="hint" id="hint"></div>
+ </div>
+</div>
+<div id="holding"></div>
+<div id="fade"><p id="fadeP"></p></div>
+<div class="overlay" id="ov"></div>
+<div id="cursor"></div>
+<script>
+(()=>{
+'use strict';
+const VW=1600,VH=900;
+const cv=document.getElementById('c'),main=cv.getContext('2d');let ctx=main;
+const hud=document.getElementById('hud'),cur=document.getElementById('cursor'),stage=document.getElementById('stage');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,DPR,S,OX,OY,pan=0,maxPan=0;
+const clampPan=p=>Math.max(-maxPan,Math.min(maxPan,p));
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;S=Math.max(W/VW,Math.min(H/VH,W*1.9/VW));maxPan=Math.max(0,(VW*S-W)/2);pan=clampPan(pan);OX=(W-VW*S)/2+pan;OY=(H-VH*S)/2}
+addEventListener('resize',resize);resize();
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const P=f=>{const p=new Path2D();f(p);return p};
+function rimFill(path,dark,rim,dx,dy){ctx.save();ctx.clip(path);ctx.fillStyle=rim;ctx.fill(path);ctx.translate(dx,dy);ctx.fillStyle=dark;ctx.fill(path);ctx.restore()}
+const lg=(x0,y0,x1,y1,st)=>{const g=ctx.createLinearGradient(x0,y0,x1,y1);st.forEach((c,i)=>g.addColorStop(i/(st.length-1),c));return g};
+function glow(x,y,r,c,a){ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(${c},${a})`);g.addColorStop(1,`rgba(${c},0)`);ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);ctx.restore()}
+let mx=0,my=0,tx=0,ty=0,mouse=!matchMedia('(pointer:coarse)').matches;
+const off=d=>({x:-mx*d*30,y:0});
+const grain=document.createElement('canvas');grain.width=grain.height=200;
+{const g=grain.getContext('2d'),im=g.createImageData(200,200),r=rng(7);for(let i=0;i<im.data.length;i+=4){const v=r()*255;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0)}
+const grainPat=main.createPattern(grain,'repeat');
+
+/* ================= characters ================= */
+const CR={
+ legs:[P(p=>{p.moveTo(-16,-52);p.lineTo(-6,-52);p.lineTo(-7,-11);p.lineTo(-17,-11);p.closePath();p.moveTo(-18,-13);p.lineTo(-7,-13);p.quadraticCurveTo(-1,-7,3,-3);p.lineTo(3,0);p.lineTo(-19,0);p.closePath()}),
+       P(p=>{p.moveTo(4,-52);p.lineTo(14,-52);p.lineTo(18,-11);p.lineTo(8,-11);p.closePath();p.moveTo(7,-13);p.lineTo(18,-13);p.quadraticCurveTo(24,-7,29,-3);p.lineTo(29,0);p.lineTo(6,0);p.closePath()})],
+ coat:P(p=>{p.moveTo(-11,-204);p.quadraticCurveTo(-25,-199,-30,-187);p.quadraticCurveTo(-33,-160,-30,-128);p.quadraticCurveTo(-34,-88,-40,-48);p.quadraticCurveTo(-29,-42,-19,-45);p.lineTo(-12,-62);p.lineTo(-6,-44);p.quadraticCurveTo(15,-41,38,-47);p.quadraticCurveTo(34,-86,31,-124);p.quadraticCurveTo(33,-168,26,-188);p.quadraticCurveTo(17,-198,8,-200);p.closePath();
+  p.moveTo(-15,-208);p.lineTo(-7,-195);p.lineTo(9,-195);p.lineTo(12,-203);p.quadraticCurveTo(0,-199,-15,-208);p.closePath()}),
+ armR:P(p=>{p.moveTo(22,-185);p.quadraticCurveTo(37,-160,41,-118);p.lineTo(43,-110);p.lineTo(33,-107);p.lineTo(31,-118);p.quadraticCurveTo(28,-150,16,-172);p.closePath()}),
+ hands:P(p=>{p.ellipse(38,-104,4.6,5,0,0,Math.PI*2);p.moveTo(-26,-104);p.ellipse(-30,-104,4,5.6,.2,0,Math.PI*2)}),
+ head:P(p=>{p.moveTo(-11,-227);p.quadraticCurveTo(-16,-214,-12,-204);p.lineTo(-9,-197);p.lineTo(8,-196);p.quadraticCurveTo(13,-199,14,-203);p.lineTo(17,-205);p.lineTo(15.5,-208);p.lineTo(19,-211);p.lineTo(15.5,-217);p.quadraticCurveTo(14.5,-225,10,-228);p.closePath()}),
+ bowler:P(p=>{p.moveTo(-14,-229);p.quadraticCurveTo(-15,-250,1,-251);p.quadraticCurveTo(16,-250,16,-229);p.closePath();p.moveTo(-21,-227);p.quadraticCurveTo(-17,-231.5,-8,-230.5);p.lineTo(10,-230.5);p.quadraticCurveTo(20,-231.5,23,-227.5);p.quadraticCurveTo(17,-224,0,-225);p.quadraticCurveTo(-16,-224,-21,-227);p.closePath()})};
+const PAL={
+ day:{ink:'#25211e',rim:'#7d7468',seam:'#3b3530',leg:'#4a443e',edge:'rgba(150,140,130,.6)',skin:'#bf8d6c',skinL:'#ecc7a4',hand:'#b98667',handL:'#e6bf9c',hat:'#2a2420',hatL:'#6a5f55'},
+ gas:{ink:'#1b1511',rim:'#c8925a',seam:'#30241a',leg:'#5c4430',edge:'rgba(220,160,100,.55)',skin:'#97684b',skinL:'#f0b880',hand:'#91634a',handL:'#eab27c',hat:'#1e1814',hatL:'#a07a52'}};
+const crane={x:700,y:866,tx:700,dir:1,walking:false,phase:0,res:null,hidden:false};
+function drawCrane(t,C){
+ if(crane.hidden)return;const c=crane;ctx.save();ctx.translate(c.x,c.y);
+ const sh=ctx.createRadialGradient(0,0,0,0,0,110);sh.addColorStop(0,'rgba(0,0,0,.42)');sh.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sh;ctx.save();ctx.scale(1.4,.16);ctx.beginPath();ctx.arc(0,0,110,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.scale(1.18*c.dir,1.3);
+ const sw=c.walking?Math.sin(c.phase):0,bob=c.walking?-Math.abs(Math.cos(c.phase))*3:0,br=reduce?0:Math.sin(t*.0016)*.6;
+ ctx.translate(0,bob);
+ for(const i of[0,1]){const px=i?9:-11,py=-58;ctx.save();ctx.translate(px,py);ctx.rotate((i?1:-1)*sw*.3);ctx.translate(-px,-py);rimFill(CR.legs[i],C.ink,C.leg,-2.5,0);ctx.restore()}
+ ctx.save();ctx.translate(0,br*.4);
+ rimFill(CR.coat,C.ink,C.rim,-3.5,1);
+ ctx.lineCap='round';ctx.strokeStyle=C.seam;ctx.lineWidth=1.3;
+ ctx.beginPath();ctx.moveTo(-9,-194);ctx.quadraticCurveTo(-12,-130,-14,-64);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(-22,-150);ctx.quadraticCurveTo(-25,-110,-31,-58);ctx.moveTo(10,-150);ctx.quadraticCurveTo(13,-100,18,-46);ctx.moveTo(-29,-128);ctx.quadraticCurveTo(-18,-123,-9,-127);ctx.moveTo(9,-127);ctx.quadraticCurveTo(20,-123,30,-126);ctx.stroke();
+ ctx.strokeStyle=C.edge;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(29,-178);ctx.quadraticCurveTo(32,-150,31,-124);ctx.stroke();
+ ctx.fillStyle=C.edge;for(const by of[-162,-150,-138]){ctx.beginPath();ctx.arc(31,by,1.3,0,Math.PI*2);ctx.fill()}
+ if(has('watch')){ctx.strokeStyle='rgba(225,225,230,.85)';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(22,-144);ctx.quadraticCurveTo(26,-136,31,-139);ctx.stroke()}
+ rimFill(CR.armR,C.ink,C.rim,-3,1);
+ rimFill(CR.hands,C.hand,C.handL,-2,1);
+ const ctalk=talkNow('crane');
+ ctx.save();ctx.translate(0,br*.3-(ctalk?Math.abs(Math.sin(t*.011))*1.4:0));
+ rimFill(CR.head,C.skin,C.skinL,-2.5,.5);
+ ctx.fillStyle='#3a2a20';ctx.beginPath();ctx.moveTo(-11,-226);ctx.quadraticCurveTo(-16,-214,-12,-204);ctx.lineTo(-9,-198);ctx.lineTo(-5,-205);ctx.quadraticCurveTo(-8,-216,-4,-226);ctx.fill();
+ ctx.beginPath();ctx.moveTo(10,-206.5);ctx.quadraticCurveTo(15,-209,18.5,-205);ctx.quadraticCurveTo(15,-203,10,-204);ctx.fill();
+ ctx.fillStyle='#2a1d16';ctx.beginPath();ctx.arc(9.5,-215,1.1,0,Math.PI*2);ctx.fill();
+ if(ctalk){const op=Math.abs(Math.sin(t*.03));ctx.fillStyle='#3a1a14';ctx.beginPath();ctx.ellipse(13.5,-200.5,2.6,.5+op*1.9,0,0,Math.PI*2);ctx.fill()}
+ ctx.strokeStyle='rgba(60,40,30,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(6,-219.5);ctx.lineTo(12,-219);ctx.stroke();
+ rimFill(CR.bowler,C.hat,C.hatL,-2.5,1);
+ ctx.strokeStyle='#14100c';ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(-14,-232.5);ctx.lineTo(16,-232.5);ctx.stroke();
+ ctx.strokeStyle='rgba(255,240,220,.28)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(1,-233,13,-1.25,-.35);ctx.stroke();
+ ctx.restore();ctx.restore();ctx.restore()}
+
+function person(x,y,s,o,t){
+ ctx.save();ctx.translate(x,y);
+ if(o.shadow!==false){ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(0,0,44*s,6*s,0,0,Math.PI*2);ctx.fill()}
+ ctx.scale(s*(o.flip?-1:1),s);
+ const br=reduce?0:Math.sin(t*.0015+(o.ph||0))*1.1,w=o.w||1,coat=o.coat||'#2a2622',rim=o.rim||'#8a7e70',skin=o.skin||'#d2a080',skinL=o.skinL||'#f2cca8';
+ if(o.skirt){rimFill(P(p=>{p.moveTo(-22*w,-112);p.quadraticCurveTo(-44*w,-40,-54*w,0);p.lineTo(54*w,0);p.quadraticCurveTo(44*w,-40,22*w,-112);p.closePath()}),o.skirt,rim,-3,1)}
+ else{rimFill(P(p=>{p.rect(-15*w,-64,11,62);p.rect(4*w,-64,11,62)}),o.trousers||'#1e1c1a',rim,-2,0);ctx.fillStyle='#0e0c0a';ctx.beginPath();ctx.ellipse(-10*w+2,-2,10,4,0,0,Math.PI*2);ctx.ellipse(10*w+2,-2,10,4,0,0,Math.PI*2);ctx.fill()}
+ ctx.translate(0,br*.3);
+ const hem=o.skirt?-108:(o.short?-72:-46);
+ const bw=o.stout?12:0;
+ const body=P(p=>{p.moveTo(-12*w,-198);p.quadraticCurveTo(-30*w,-194,-32*w,-176);p.quadraticCurveTo(-36*w-bw,-130,-34*w,-112);p.quadraticCurveTo(-37*w,hem+24,-36*w,hem);p.lineTo(36*w,hem);p.quadraticCurveTo(37*w,hem+24,34*w+bw*.6,-100);p.quadraticCurveTo(40*w+bw*1.6,-140,32*w,-176);p.quadraticCurveTo(30*w,-194,12*w,-198);p.closePath()});
+ rimFill(body,coat,rim,-3,1);
+ if(o.braid){ctx.strokeStyle='#c9a24a';ctx.lineWidth=2.2;ctx.stroke(body)}
+ if(o.apron){ctx.fillStyle='#d8d2c4';ctx.fillRect(-22*w,-150,44*w,hem+150)}
+ if(o.shawl){ctx.fillStyle=o.shawl;ctx.beginPath();ctx.moveTo(-34*w,-188);ctx.quadraticCurveTo(0,-176,34*w,-188);ctx.lineTo(0,-128);ctx.closePath();ctx.fill()}
+ if(!o.skirt){ctx.fillStyle='#e6e0d2';ctx.beginPath();ctx.moveTo(-7,-198);ctx.lineTo(0,-180);ctx.lineTo(7,-198);ctx.fill();ctx.fillStyle='#16120f';ctx.fillRect(-2,-194,4,10)}
+ if(o.chain){ctx.strokeStyle='#e0b45a';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-16*w,-138);ctx.quadraticCurveTo(0,-126,16*w,-138);ctx.stroke()}
+ if(o.arms==='front'){rimFill(P(p=>{p.moveTo(-30*w,-186);p.quadraticCurveTo(-38*w,-150,-24,-124);p.lineTo(-14,-116);p.lineTo(-10,-126);p.quadraticCurveTo(-24*w,-150,-20*w,-176);p.closePath();p.moveTo(30*w,-186);p.quadraticCurveTo(38*w,-150,24,-124);p.lineTo(14,-116);p.lineTo(10,-126);p.quadraticCurveTo(24*w,-150,20*w,-176);p.closePath()}),coat,rim,-2,1);
+  ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(-12,-118,5,4.5,0,0,Math.PI*2);ctx.ellipse(12,-118,5,4.5,0,0,Math.PI*2);ctx.fill()}
+ else if(o.arms==='point'){rimFill(P(p=>{p.moveTo(-30*w,-186);p.quadraticCurveTo(-40*w,-150,-38*w,-108);p.lineTo(-30*w,-108);p.quadraticCurveTo(-30*w,-150,-22*w,-178);p.closePath();p.moveTo(24*w,-188);p.lineTo(76,-176);p.lineTo(76,-166);p.lineTo(24*w,-170);p.closePath()}),coat,rim,-2,1);
+  ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(-34*w,-104,4.5,5,0,0,Math.PI*2);ctx.ellipse(81,-171,5,4.2,0,0,Math.PI*2);ctx.fill()}
+ else{rimFill(P(p=>{p.moveTo(-30*w,-186);p.quadraticCurveTo(-40*w,-150,-38*w,-108);p.lineTo(-30*w,-108);p.quadraticCurveTo(-30*w,-150,-22*w,-178);p.closePath();p.moveTo(30*w,-186);p.quadraticCurveTo(40*w,-150,38*w,-108);p.lineTo(30*w,-108);p.quadraticCurveTo(30*w,-150,22*w,-178);p.closePath()}),coat,rim,-2,1);
+  ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(-34*w,-104,4.5,5,0,0,Math.PI*2);ctx.ellipse(34*w,-104,4.5,5,0,0,Math.PI*2);ctx.fill()}
+ const talk=talkNow(o.id);
+ ctx.save();ctx.translate(0,br*.2-(talk?Math.abs(Math.sin(t*.011))*1.6:0));
+ if(o.neck!==false){ctx.fillStyle=skin;ctx.fillRect(-6,-208,12,14);ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(-6,-208,4,14)}
+ if(o.head){ctx.translate(0,-204);ctx.scale(o.head,o.head);ctx.translate(0,204)}
+ const tq=!o.profile;
+ if(tq){
+  /* three-quarter view: the face turned most of the way towards us, both eyes showing, the far ear just visible */
+  rimFill(P(p=>p.ellipse(1,-216,12.5,14.5,0,0,Math.PI*2)),skin,skinL,-2.5,.5);
+  ctx.fillStyle='rgba(0,0,0,.14)';ctx.beginPath();ctx.ellipse(-8.5,-215,2.6,4,0,0,Math.PI*2);ctx.fill();
+  if(o.hair){ctx.fillStyle=o.hair;ctx.beginPath();ctx.ellipse(-1,-224,12.6,8.5,-.12,Math.PI*.92,Math.PI*2.02);ctx.fill();ctx.fillRect(-11.5,-224,5,12)}
+  ctx.fillStyle='rgba(0,0,0,.13)';ctx.beginPath();ctx.moveTo(6.6,-218);ctx.lineTo(9.8,-209.5);ctx.lineTo(6.4,-209);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(255,240,220,.35)';ctx.fillRect(7.8,-216,1.2,5);
+  ctx.fillStyle='#1a120c';ctx.beginPath();ctx.arc(1.8,-218.2,1.15,0,Math.PI*2);ctx.arc(9.4,-218.6,1,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(40,26,18,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-.6,-221.6);ctx.lineTo(4,-222.2);ctx.moveTo(7.6,-222.3);ctx.lineTo(11,-221.6);ctx.stroke();
+  if(!talk){ctx.strokeStyle='rgba(110,50,40,.6)';ctx.lineWidth=1.1;ctx.beginPath();ctx.moveTo(3.4,-204.4);ctx.quadraticCurveTo(6,-203.6,8.6,-204.6);ctx.stroke()}}
+ else{
+ rimFill(P(p=>p.ellipse(0,-216,11.5,14,0,0,Math.PI*2)),skin,skinL,-2.5,.5);
+ ctx.fillStyle=skin;ctx.beginPath();ctx.moveTo(10,-218);ctx.lineTo(15,-211);ctx.lineTo(10,-209);ctx.fill();
+ ctx.fillStyle='#1a120c';ctx.beginPath();ctx.arc(6,-219,1.1,0,Math.PI*2);ctx.fill();
+ if(o.hair){ctx.fillStyle=o.hair;ctx.beginPath();ctx.ellipse(-3,-224,11,8,-.2,Math.PI*.9,Math.PI*2.05);ctx.fill();ctx.fillRect(-11,-224,5,12)}}
+ if(o.whiskers){ctx.fillStyle=o.whiskers;ctx.beginPath();ctx.moveTo(-6,-216);ctx.quadraticCurveTo(-4,-200,4,-202);ctx.lineTo(6,-208);ctx.quadraticCurveTo(0,-206,-1,-216);ctx.fill()}
+ if(o.beard){ctx.fillStyle=o.beard;ctx.beginPath();ctx.moveTo(-8,-210);ctx.quadraticCurveTo(-6,-190,6,-192);ctx.quadraticCurveTo(12,-198,11,-206);ctx.lineTo(4,-206);ctx.quadraticCurveTo(-2,-204,-8,-210);ctx.fill()}
+ if(talk){const op=Math.abs(Math.sin(t*.03));ctx.fillStyle='#3a1a14';ctx.beginPath();ctx.ellipse(tq?6:7.5,tq?-204.6:-206.5,2.8,.6+op*2.2,0,0,Math.PI*2);ctx.fill()}
+ if(o.specs){ctx.strokeStyle='rgba(220,210,190,.8)';ctx.lineWidth=1;ctx.beginPath();if(tq){ctx.arc(1.8,-218.2,3.1,0,Math.PI*2);ctx.moveTo(12.1,-218.6);ctx.arc(9.4,-218.6,2.7,0,Math.PI*2);ctx.moveTo(4.9,-218.4);ctx.lineTo(6.7,-218.5);ctx.moveTo(-1.3,-218.6);ctx.lineTo(-8,-219.5)}else{ctx.arc(6.5,-218.5,3.4,0,Math.PI*2);ctx.moveTo(3,-219);ctx.lineTo(-6,-220)}ctx.stroke()}
+ const hc=o.hatC||'#141110',hl=o.hatL||rim;
+ if(o.hat==='top'){rimFill(P(p=>{p.moveTo(-11.5,-229);p.lineTo(-12.5,-262);p.quadraticCurveTo(0,-265,13,-262);p.lineTo(12,-229);p.closePath();p.ellipse(0,-229,20,3.6,0,0,Math.PI*2)}),hc,hl,-2,1)}
+ else if(o.hat==='bowler'){rimFill(P(p=>{p.moveTo(-12,-228);p.quadraticCurveTo(-13,-247,1,-248);p.quadraticCurveTo(14,-247,13,-228);p.closePath();p.ellipse(0,-228,19,3.4,0,0,Math.PI*2)}),hc,hl,-2,1)}
+ else if(o.hat==='cap'){rimFill(P(p=>{p.moveTo(-13,-224);p.quadraticCurveTo(-13,-240,4,-240);p.quadraticCurveTo(18,-239,24,-226);p.lineTo(-13,-224);p.closePath()}),hc,hl,-2,1);ctx.fillStyle=hc;ctx.fillRect(4,-228,22,3)}
+ else if(o.hat==='cocked'){rimFill(P(p=>{p.moveTo(-28,-222);p.quadraticCurveTo(0,-262,28,-222);p.quadraticCurveTo(0,-230,-28,-222);p.closePath()}),hc,hl,-2,1);ctx.strokeStyle='#c9a24a';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(-28,-222);ctx.quadraticCurveTo(0,-230,28,-222);ctx.stroke()}
+ else if(o.hat==='widow'){ctx.fillStyle='#e8e2d6';ctx.beginPath();ctx.ellipse(-2,-226,15,10,-.15,Math.PI,Math.PI*2.1);ctx.fill();ctx.fillStyle='rgba(232,226,214,.8)';for(let i=0;i<7;i++){ctx.beginPath();ctx.arc(-15+i*4.5,-222+Math.sin(i)*1.5,2.4,0,Math.PI*2);ctx.fill()}}
+ ctx.restore();ctx.restore()}
+
+/* ================= state ================= */
+const SAVE='blackseam-prologue-v2';
+const fresh=()=>({scene:'office',inv:['watch'],flags:{},money:16,ledger:['grice','tom','bevan'],secrets:[],seen:{}});
+let G=fresh();
+const has=i=>G.inv.includes(i),F=f=>!!G.flags[f];
+function save(){try{localStorage.setItem(SAVE,JSON.stringify(G))}catch(_){}}
+function loadSave(){try{const s=JSON.parse(localStorage.getItem(SAVE)||'null');if(s&&s.scene&&!s.flags.done)return s}catch(_){}return null}
+function flag(f,v=true){G.flags[f]=v;save();ui()}
+function give(i){if(!has(i)){G.inv.push(i);toast(`Satchel · <b>${ITEMS[i].name}</b>`);bump('satchel')}save();ui()}
+function drop(i){G.inv=G.inv.filter(x=>x!==i);if(sel===i)setSel(null);save();ui()}
+function addLedger(id){if(!G.ledger.includes(id)){G.ledger.push(id);toast(`Ledger · <b>${LEDGER[id][0]}</b>`);bump('ledger');G.seen.ledger=false}save();ui()}
+function addSecret(id){if(!G.secrets.includes(id)){G.secrets.push(id);toast(`Secret · <b>${SECRETS[id][0]}</b>`);bump('secrets');G.seen.secrets=false}save();ui()}
+function spend(d){G.money-=d;save();ui()}
+function earn(d){G.money+=d;save();ui()}
+const lsd=d=>{const l=Math.floor(d/240),s=Math.floor(d%240/12),p=d%12;const a=[];if(l)a.push('£'+l);if(s||l)a.push(s+'s');if(p||!a.length)a.push(p+'d');return a.join(' ')};
+
+const IC={
+ notebook:'<rect x="11" y="7" width="26" height="34" rx="2"/><path d="M15 7v34M30 7v34"/><path d="M19 15h8"/>',
+ coal:'<path d="M10 30l6-14 12-4 10 9-2 13-14 5z" fill="currentColor" fill-opacity=".35"/><path d="M16 16l6 10 14-5M22 26l-2 12"/>',
+ bletter:'<path d="M12 8h18l6 6v26H12z"/><path d="M30 8v6h6"/><path d="M17 20h14M17 25h14M17 30h8"/>',
+ specs:'<circle cx="15" cy="26" r="7"/><circle cx="33" cy="26" r="7"/><path d="M22 25q2-3 4 0M8 24l-4-4M40 24l4-4"/>',
+ graphite:'<path d="M10 36l22-22 4 4-22 22-6 2z"/><path d="M28 18l4 4"/>',
+ hlletter:'<rect x="8" y="12" width="32" height="24" rx="2"/><path d="M8 13l16 12 16-12"/><circle cx="24" cy="28" r="4" fill="currentColor" fill-opacity=".5"/>',
+ chits:'<rect x="12" y="10" width="24" height="30" rx="2"/><path d="M12 15h24M17 22h14M17 27h10"/>',
+ drawing:'<rect x="9" y="9" width="30" height="30"/><path d="M14 30h20M14 30V16h10v14M24 22h10"/><path d="M30 34l5-2"/>',
+ osletter:'<path d="M10 8h28v32H10z"/><path d="M24 8v32"/><path d="M14 16h7M14 21h7M14 26h6M14 33q3-3 6 0"/><path d="M29 18l2-3 2 3 2-3 2 3v3h-8z"/>',
+ forged:'<path d="M12 8h24v32H12z"/><path d="M21 14l1.5-2 1.5 2 1.5-2 1.5 2v2h-6z"/><path d="M16 21h16M16 25h16M16 29h10M18 35q4-4 6 0t6-1"/>',
+ order:'<rect x="12" y="12" width="24" height="24" rx="2"/><path d="M16 19h16M16 24h12M17 31q4-4 6 0t6-1"/>',
+ theodolite:'<path d="M24 22v6M24 28l-10 14M24 28l10 14M24 28v14"/><rect x="14" y="13" width="20" height="7" rx="3"/><circle cx="24" cy="24" r="3"/>',
+ box:'<path d="M8 18l16-8 16 8v18l-16 8-16-8z"/><path d="M8 18l16 8 16-8M24 26v18"/>',
+ watch:'<circle cx="24" cy="27" r="12"/><path d="M24 15v-4M21 10h6M24 27l5-4M24 27v-6"/>',
+ bticket:'<path d="M8 14h32v20H8z"/><path d="M14 14v20" stroke-dasharray="2 2"/><path d="M19 21h16M19 27h10"/>',
+ pawnticket:'<path d="M8 14h32v20H8z"/><path d="M14 14v20" stroke-dasharray="2 2"/><path d="M19 21h16M19 27h10"/>',
+ rticket:'<rect x="10" y="16" width="28" height="16" rx="1.5"/><path d="M15 21h18M15 26h11"/><circle cx="33" cy="27" r="2"/>',
+ humbug:'<path d="M17 24l-9-6v12zM31 24l9-6v12z"/><ellipse cx="24" cy="24" rx="8" ry="7"/><path d="M19 19l5 10M24 17.5l5 10"/>'};
+const ITEMS={
+ notebook:{name:'Bevan’s notebook',look:'Bevan’s field book for 1851. Four pages torn out, cleanly, near the end. The page underneath still carries the dents of a hard pencil. A rubbing would bring them up, and I have soft graphite in my table drawer.'},
+ coal:{name:'Lump of coal',look:'A lump the size of a fist, labelled in Bevan’s hand: “Cwm Du, 1851”. It’s hard and bright, and it doesn’t blacken my fingers.'},
+ bletter:{name:'Bevan’s letter',look:'“My dear Gwen, I shall be home to Pen-y-graig for the harvest, and I have something to show you on our own land that will—” It stops there.'},
+ specs:{name:'Bevan’s spectacles',look:'Steel-rimmed. One lens cracked. His daughter will want these.'},
+ graphite:{name:'Soft graphite',look:'A stick of soft Cumberland lead. Too soft for drafting. Bevan gave it to me my first year here, for taking rubbings of the brasses in country churches.'},
+ hlletter:{name:'Letter for Mr Dobbs',look:'Sealed with the firm’s wafer. “Mr Dobbs, Coal Factor. The Coal Exchange, Lower Thames Street. By hand.”'},
+ chits:{name:'Office chits',look:'A pad of the firm’s printed requisition slips. “Hallam & Pike, Mining Engineers. Please supply bearer with …”'},
+ drawing:{name:'Ventilation plan',look:'My drawing: the ventilation plan for the Ystrad level. In the corner, Mr Hallam’s signature: “Approved, R. Hallam.”'},
+ osletter:{name:'Ordnance Survey letter',look:'From the Ordnance Survey Office, Southampton, 1867, about boundary sheets. Signed “H. James, Colonel R.E., Director-General”. Government paper, folded double.'},
+ forged:{name:'Letter of authority',look:'“The bearer, Mr E. Crane, Civil Assistant, is authorised to enter upon lands in the County of Glamorgan for the purposes of the Survey. H. James, Col. R.E.” I’d believe it.'},
+ order:{name:'Instrument order',look:'“Please supply bearer with the 5-inch Troughton & Simms theodolite. R. Hallam.” It’s a better signature than Mr Hallam’s.'},
+ theodolite:{name:'Bevan’s theodolite',look:'Josiah’s own five-inch Troughton & Simms, in a mahogany box with “J.B.” cut in the lid, and the tripod. Forty guineas of brass and glass, and he pawned it for ten shillings.'},
+ bticket:{name:'Bevan’s pawn ticket',look:'Mrs Hatch, Leather Lane. “One theodolite, five-inch, in case, with stand. J. Bevan. 4 May 1869.” Ten shillings lent. Redeemable within twelve months and seven days.'},
+ box:{name:'Bevan’s box',look:'Thirty years of a man’s life, and it fits in a tea chest. Addressed to Mrs Gwen Rees, Pen-y-graig, Cwm Du, near Pontypridd.'},
+ watch:{name:'Father’s watch',look:'Silver, a London hallmark. It stopped at twenty past four the day we buried him, and I never had it mended.'},
+ pawnticket:{name:'Pawn ticket',look:'Mrs Hatch, Leather Lane. One silver watch. Redeemable within twelve months and seven days.'},
+ rticket:{name:'Railway ticket',look:'A little Edmondson card, stamped with today’s date. Paddington to Cardiff, second class.'},
+ humbug:{name:'Humbug',look:'A black-and-white humbug in a twist of paper, from my drawer.'}};
+const LEDGER={
+ grice:['Mr Grice','Chief clerk at Hallam & Pike. Keeps the rules, the keys, and the instrument book.'],
+ tom:['Tom','Office boy, twelve years old. Will do anything for a penny, and say anything for twopence.'],
+ bevan:['Josiah Bevan','Surveyor, thirty years with the firm. Died at his desk on Tuesday, between one sentence and the next.'],
+ gwen:['Gwen Rees','Bevan’s daughter. A widow, at Pen-y-graig farm, Cwm Du, Glamorgan.'],
+ dobbs:['Mr Dobbs','Coal factor on the Exchange. Can name a coal by the way it breaks.'],
+ vane:['Septimus Vane','Agent of the Taff and Rhondda Coal Company. Buying leases up every valley in Glamorgan.'],
+ hatch:['Mrs Hatch','Pawnbroker, Leather Lane. Calls everybody Smith.'],
+ ellis:['Mr Ellis','Law-writer, lodging over Mrs Hatch’s shop. Copies wills for Chancery Lane by day, and any hand you like by night. I have never seen his face.']};
+const SECRETS={
+ seam:['Bevan’s seam','Cae’r Glo, below Pen-y-graig. Six feet of steam coal, and a trial pit under the old oak. Nobody alive knows but me.'],
+ forgery:['The letter of authority','Colonel Sir Henry James of the Ordnance Survey has never heard of me. A law-writer over a pawnshop signed for him.'],
+ ticket:['Bevan’s pawn ticket','It belonged in his daughter’s tea chest with the rest of his things. I redeemed his theodolite with it instead.'],
+ kept:['The notebook','Gwen Rees will get her father’s spectacles and his last letter. I kept his notebook.']};
+
+/* ================= UI ================= */
+const subEl=document.getElementById('sub'),whoEl=document.getElementById('who'),lineEl=document.getElementById('line'),choicesEl=document.getElementById('choices');
+let busy=false,adv=null,typing=null;
+function setBusy(b){busy=b;document.body.classList.toggle('busy',b);if(b)clearLabels()}
+const VOICE={"Mr Grice|Mr Crane. A moment.": "../voices/samples/office/00-grice.mp3", "Mr Grice|Mr Bevan’s effects. His daughter has written for them. Box them up and send them by railway parcel from Paddington.": "../voices/samples/office/01-grice.mp3", "Mr Grice|And take this to Mr Dobbs at the Coal Exchange. Mr Hallam wants it in his hand today, not tomorrow.": "../voices/samples/office/02-grice.mp3", "Elias Crane|Paddington is not on the way to Lower Thames Street, Mr Grice.": "../voices/samples/office/03-crane.mp3", "Mr Grice|Then you had better start walking, Mr Crane.": "../voices/samples/office/04-grice.mp3", "Elias Crane|Thirty years at that desk, and they box him up in an afternoon.": "../voices/samples/office/05-crane.mp3", "Tom|Is that for the stove, sir? Bit small.": "../voices/samples/office/06-tom.mp3", "Elias Crane|No, Tom. It’s for later.": "../voices/samples/office/07-crane.mp3", "Tom|Nice watch, sir. Shame it don’t go.": "../voices/samples/office/08-tom.mp3", "Elias Crane|Coal in August. Mr Grice says the damp gets into the drawings, and Mr Grice is always right.": "../voices/samples/office/09-crane.mp3", "Elias Crane|Burn it? Not in here. If it’s what I think, I want it whole, and I want a coal man to see it.": "../voices/samples/office/10-crane.mp3", "Elias Crane|Eleven years at this table. Other men’s mines, other men’s money, drawn very neatly.": "../voices/samples/office/11-crane.mp3", "Elias Crane|Rain on Westminster. The clock tower is a grey ghost today. Good light for tracing, though, if you hold the paper flat to the glass.": "../voices/samples/office/12-crane.mp3", "Elias Crane|The Geological Survey’s map. A great black basin of coal from Pontypool to St Brides Bay, and the valleys cut into it like fingers.": "../voices/samples/office/13-crane.mp3", "Elias Crane|Thirty years at this desk. He died at it on Tuesday, between one sentence and the next. Nobody has sat there since.": "../voices/samples/office/14-crane.mp3", "Elias Crane|Half packed. Thirty years of a man, and room to spare.": "../voices/samples/office/15-crane.mp3", "Elias Crane|An empty tea chest from the clerks’ room. It still smells of Assam.": "../voices/samples/office/16-crane.mp3", "Elias Crane|His field book. By rights it goes in with the rest.": "../voices/samples/office/17-crane.mp3", "Elias Crane|…No. Not yet.": "../voices/samples/office/18-crane.mp3", "Elias Crane|His coal sample? No. That stays with me.": "../voices/samples/office/19-crane.mp3", "Elias Crane|She doesn’t need his pencils.": "../voices/samples/office/20-crane.mp3", "Elias Crane|The firm’s correspondence, filed by Mr Grice, by year, by client, by the will of God.": "../voices/samples/office/21-crane.mp3", "Mr Grice|Personal effects go in the box, Mr Crane. Not on my desk.": "../voices/samples/office/22-grice.mp3", "Elias Crane|Not to Grice. Grice would file it.": "../voices/samples/office/23-crane.mp3", "Elias Crane|The speaking tube to Mr Hallam’s room. You blow, it whistles upstairs, and Mr Hallam asks who has disturbed him.": "../voices/samples/office/24-crane.mp3", "Elias Crane|And say what? No.": "../voices/samples/office/25-crane.mp3", "Elias Crane|One empty shelf. Mr Grice will notice on Monday.": "../voices/samples/office/26-crane.mp3", "Elias Crane|Levels, chains, and the good theodolite: a five-inch Troughton & Simms. Forty guineas, under lock and key.": "../voices/samples/office/27-crane.mp3", "Elias Crane|Nothing in there I need now.": "../voices/samples/office/28-crane.mp3", "Elias Crane|Locked. Mr Grice has the key, and Mr Grice has rules.": "../voices/samples/office/29-crane.mp3", "Tom|I got a clip round the ear for that, sir. Worth it though.": "../voices/samples/office/30-tom.mp3", "Tom|Mr Bevan used to give me humbugs, sir. Now nobody does.": "../voices/samples/office/31-tom.mp3", "Elias Crane|Life is hard, Tom.": "../voices/samples/office/32-crane.mp3", "Tom|It’s harder without humbugs, sir.": "../voices/samples/office/33-tom.mp3", "Elias Crane|Tom. A penny says Mr Pike wants Mr Grice in the strongroom. Urgently.": "../voices/samples/office/34-crane.mp3", "Tom|Mr Pike’s in Brighton, sir.": "../voices/samples/office/35-tom.mp3", "Elias Crane|Mr Grice doesn’t know that.": "../voices/samples/office/36-crane.mp3", "Tom|…Make it tuppence?": "../voices/samples/office/37-tom.mp3", "Tom|Pleasure doing business, sir.": "../voices/samples/office/38-tom.mp3", "Tom|Robbery, that is.": "../voices/samples/office/39-tom.mp3", "Tom|Mr GRICE! Mr Pike wants you in the strongroom, sir! Urgent!": "../voices/samples/office/40-tom.mp3", "Mr Grice|Mr Pike? He wasn’t in this morning…": "../voices/samples/office/41-grice.mp3", "Mr Grice|Very well. Touch nothing, any of you.": "../voices/samples/office/42-grice.mp3", "Elias Crane|Now. Quickly.": "../voices/samples/office/43-crane.mp3", "Elias Crane|A pad of the firm’s blank chits. A humbug, which I’ll keep from Tom.": "../voices/samples/office/44-crane.mp3", "Elias Crane|My ventilation plan for the Ystrad level, signed off by Mr Hallam himself. He signs everything I draw. He’s never once read one.": "../voices/samples/office/45-crane.mp3", "Elias Crane|His pen tray, his spectacles, a half-written letter.": "../voices/samples/office/46-crane.mp3", "Elias Crane|A lump of coal with a paper label. And his field book.": "../voices/samples/office/47-crane.mp3", "Elias Crane|His daughter gets the personal effects. The firm gets nothing. That’s what Grice said.": "../voices/samples/office/48-crane.mp3", "Elias Crane|His last letter, unfinished. She should have it.": "../voices/samples/office/49-crane.mp3", "Elias Crane|His spectacles. One lens cracked.": "../voices/samples/office/50-crane.mp3", "Elias Crane|That’s everything that belongs to her. Everything personal, anyway.": "../voices/samples/office/51-crane.mp3", "Elias Crane|Lid on. Twelve nails. Addressed to Mrs Gwen Rees, Pen-y-graig, Cwm Du, near Pontypridd.": "../voices/samples/office/52-crane.mp3", "Elias Crane|His notebook is not in it.": "../voices/samples/office/53-crane.mp3", "Mr Grice|The firm’s correspondence is the firm’s business, Mr Crane.": "../voices/samples/office/54-grice.mp3", "Elias Crane|He hasn’t looked up. He never needs to. If something called him away from that desk for a minute… Tom would shout anything for a penny.": "../voices/samples/office/55-crane.mp3", "Elias Crane|Southampton… Ordnance Survey… here.": "../voices/samples/office/56-crane.mp3", "Mr Grice|Mr Pike is in Brighton, Thomas.": "../voices/samples/office/57-grice.mp3", "Tom|Must’ve been Mr Bevan’s ghost, sir.": "../voices/samples/office/58-tom.mp3", "Mr Grice|Ghosts do not shout up stairwells.": "../voices/samples/office/59-grice.mp3", "Elias Crane|Government paper comes folded double, and the second leaf is blank, with the Crown embossed in the corner.": "../voices/samples/office/60-crane.mp3", "Elias Crane|Letter to the glass, blank leaf over it. The light comes through the signature.": "../voices/samples/office/61-crane.mp3", "Elias Crane|“H. James, Colonel R.E., Director-General.” Slowly. Don’t stop in the middle of a stroke. Bevan taught me that.": "../voices/samples/office/62-crane.mp3", "Elias Crane|“The bearer, Mr E. Crane, Civil Assistant, is authorised to enter upon lands…” Any farmer in Wales would open his gate to that.": "../voices/samples/office/63-crane.mp3", "Elias Crane|I need Hallam’s signature to copy.": "../voices/samples/office/64-crane.mp3", "Elias Crane|I need Hallam’s signature to copy. It’s on the drawing on my table.": "../voices/samples/office/65-crane.mp3", "Elias Crane|Hallam’s signature I have. I need something to write the order on. There’s a pad of the firm’s chits in my table drawer.": "../voices/samples/office/66-crane.mp3", "Elias Crane|A blank chit, the drawing behind it, both against the glass. “Please supply bearer with the five-inch Troughton & Simms.”": "../voices/samples/office/67-crane.mp3", "Elias Crane|“R. Hallam.” The R is a fishhook, and the tail drags. There.": "../voices/samples/office/68-crane.mp3", "Elias Crane|The drawing can go back on my table. Nobody will miss it for a minute.": "../voices/samples/office/69-crane.mp3", "Mr Grice|The letter to Mr Dobbs at the Coal Exchange, by hand, today.": "../voices/samples/office/70-grice.mp3", "Mr Grice|Mr Bevan’s personal effects boxed up for his daughter. The tea chest is by his desk. The firm’s papers stay here.": "../voices/samples/office/71-grice.mp3", "Mr Grice|That box to the parcels office at Paddington. The Post Office does not take parcels, Mr Crane, whatever you young men think.": "../voices/samples/office/72-grice.mp3", "Mr Grice|Then the box to the parcels office at Paddington. The Post Office does not take parcels, Mr Crane, whatever you young men think.": "../voices/samples/office/73-grice.mp3", "Mr Grice|Thirty years, and never once late. The firm sent a wreath.": "../voices/samples/office/74-grice.mp3", "Elias Crane|From the petty cash.": "../voices/samples/office/75-crane.mp3", "Mr Grice|From the petty cash, Mr Crane.": "../voices/samples/office/76-grice.mp3", "Mr Grice|Instruments go out on Mr Hallam’s written order, and only on Mr Hallam’s written order. Signed for in the book.": "../voices/samples/office/77-grice.mp3", "Mr Grice|Mr Hallam’s hand.": "../voices/samples/office/78-grice.mp3", "Mr Grice|The Troughton & Simms. What does Mr Hallam want with it?": "../voices/samples/office/79-grice.mp3", "Mr Grice|Surrey. Hmph. Mud.": "../voices/samples/office/80-grice.mp3", "Mr Grice|Quite right.": "../voices/samples/office/81-grice.mp3", "Mr Grice|Sign the book.": "../voices/samples/office/82-grice.mp3", "Elias Crane|“E. Crane. One theodolite, five-inch, with stand.”": "../voices/samples/office/83-crane.mp3", "Mr Grice|Bring it back clean.": "../voices/samples/office/84-grice.mp3", "Elias Crane|“Cae’r Glo, below Pen-y-graig. Seam six feet. Tell no one.” I know it by heart already.": "../voices/samples/office/85-crane.mp3", "Elias Crane|Cae’r Glo. Below Pen-y-graig. Pen-y-graig: the farm on his letter. His own land.": "../voices/samples/office/86-crane.mp3", "Elias Crane|Six feet of steam coal, and he told no one. Not the firm. Not even his daughter.": "../voices/samples/office/87-crane.mp3", "Elias Crane|Thirty years drawing other men’s mines, Josiah, and you were sitting on one.": "../voices/samples/office/88-crane.mp3", "Elias Crane|The night mail leaves Paddington at nine. Before then I need four things: what this coal is worth, a reason to be on other men’s land, an instrument to survey with, and the fare.": "../voices/samples/office/89-crane.mp3", "Elias Crane|All in my pocketbook.": "../voices/samples/office/90-crane.mp3", "Elias Crane|Not where Tom can see it. He’d have it in his mouth before it left my hand.": "../voices/samples/office/91-crane.mp3"};
+/* one reusable element, unlocked on the first tap, so iPhone Safari lets later lines play without a tap */
+const voEl=new Audio();voEl.preload='auto';let voOn=false;
+addEventListener('pointerdown',function u(){removeEventListener('pointerdown',u,true);voEl.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';voEl.play().catch(()=>{})},true);
+function stopVoice(){if(voOn){voEl.onended=null;voEl.pause();voOn=false}}
+function line(who,text){return new Promise(res=>{
+ clearInterval(typing);whoEl.textContent=who;lineEl.textContent='';choicesEl.innerHTML='';subEl.classList.add('on');
+ stopVoice();const vf=VOICE[who+'|'+text];let voEnded=true;
+ if(vf&&audio.started&&!audio.muted){voEnded=false;voOn=true;voEl.onended=()=>{voEnded=true;voOn=false;if(done){clearTimeout(auto);auto=setTimeout(go,600)}};voEl.src=vf;voEl.play().catch(()=>{voEnded=true;voOn=false})}
+ let i=0,done=false,auto;const finish=()=>{if(done)return;done=true;clearInterval(typing);lineEl.textContent=text;auto=setTimeout(go,voEnded?1600+text.length*42:60000)};
+ const go=()=>{clearTimeout(auto);clearInterval(typing);stopVoice();adv=null;res()};
+ adv=()=>{if(!done)finish();else go()};
+ if(reduce)finish();else typing=setInterval(()=>{lineEl.textContent=text.slice(0,++i);if(i>=text.length)finish()},24)})}
+function choose(opts){return new Promise(res=>{
+ adv=null;choicesEl.innerHTML='';subEl.classList.add('on');
+ opts.forEach((o,i)=>{const b=document.createElement('button');b.textContent=o;b.onclick=e=>{e.stopPropagation();choicesEl.innerHTML='';res(i)};choicesEl.append(b)});
+ setTimeout(()=>choicesEl.querySelector('button')?.focus({preventScroll:true}),30)})}
+const C_='Elias Crane';
+const say=t=>line(C_,t);
+const SPEAKERS={'Mr Grice':'grice','Tom':'tom','The beadle':'beadle','Mr Dobbs':'dobbs','Septimus Vane':'vane','Mrs Hatch':'hatch','Booking clerk':'booking','Parcels clerk':'parcels','Guard':'guard'};
+let talkWho=null,talkText='';
+{const base=line;line=(who,text,aloud)=>{talkWho=aloud?'crane':(SPEAKERS[who]||null);talkText=text;return base(who,text)}}
+const speak=t=>line(C_,t,true);
+/* true while this character's words are still typing out, or while their recorded voice is playing (voiced build) */
+const talkNow=id=>!reduce&&!!id&&talkWho===id&&(lineEl.textContent!==talkText||(typeof voOn!=='undefined'&&voOn));
+async function run(fn){if(busy)return;setBusy(true);setSel(null);try{await fn()}catch(e){console.error(e)}finally{subEl.classList.remove('on');choicesEl.innerHTML='';adv=null;setBusy(false);ui()}}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+const toastEl=document.getElementById('toast');let toastQ=[],toastOn=false;
+function toast(h){toastQ.push(h);if(!toastOn)nextToast()}
+function nextToast(){const h=toastQ.shift();if(!h){toastOn=false;return}toastOn=true;toastEl.innerHTML=h;toastEl.classList.add('on');setTimeout(()=>{toastEl.classList.remove('on');setTimeout(nextToast,320)},1900)}
+function bump(tab){const b=document.querySelector(`.tool[data-tab="${tab}"]`);if(!b)return;b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')}
+
+/* item selection (holding) */
+let sel=null;const holdEl=document.getElementById('holding');
+function setSel(i){sel=i;document.body.classList.toggle('holding',!!i);holdEl.classList.toggle('touch',!mouse);holdEl.innerHTML=i?(mouse?`Use ${ITEMS[i].name} with…`:`Using ${ITEMS[i].name} · tap something, or tap here to stop`):''}
+holdEl.addEventListener('click',()=>setSel(null));
+addEventListener('contextmenu',e=>{if(sel){e.preventDefault();setSel(null)}});
+
+/* panel */
+const panel=document.getElementById('panel');let tab=null,pick=null;
+function openTab(t){if(tab===t){closePanel();return}tab=t;pick=null;if(t==='ledger'||t==='secrets'){G.seen[t]=true}renderPanel();panel.classList.add('on');document.querySelectorAll('.tool[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));ui()}
+function closePanel(){tab=null;panel.classList.remove('on');document.querySelectorAll('.tool[data-tab]').forEach(b=>b.classList.remove('active'))}
+document.querySelectorAll('.tool[data-tab]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();if(busy)return;openTab(b.dataset.tab)}));
+function goalsList(){
+ /* each goal: [text while open, done?]; open goals show the next concrete step, done goals collapse to a short label */
+ const g=[];
+ const box=F('boxed')?['Boxed Mr Bevan’s effects for his daughter',true]
+  :!F('searched')?['Clear Mr Bevan’s desk and box up his effects for his daughter',false]
+  :['Pack Bevan’s letter and spectacles in the tea chest, then nail it shut',false];
+ g.push(box);
+ g.push(F('sent')?['Sent the box from Paddington',true]:['Send the box by railway parcel from Paddington',false]);
+ g.push(F('delivered')?['Delivered Mr Hallam’s letter to Mr Dobbs',true]
+  :['Take Mr Hallam’s letter to Mr Dobbs at the Coal Exchange'+(F('admitted')?'':' (show it to the beadle at the door)'),false]);
+ if(F('rubbed')){
+  g.push(F('valued')?['Mr Dobbs valued Bevan’s coal',true]
+   :[F('delivered')?'Show Bevan’s coal to Mr Dobbs':'Find out what Bevan’s coal is worth: Mr Dobbs at the Coal Exchange would know',false]);
+  g.push(has('forged')?['Got a letter of authority',true]
+   :F('ordered')?(F('forgeReady')?['Collect the letter from Mrs Hatch’s. Mr Ellis has had his hour',false]:['Mr Ellis wants an hour with the letter. Something else to do, then back to Leather Lane',false])
+   :!has('osletter')?['A letter that lets me walk other men’s land. The Ordnance Survey wrote to the firm; it’s in Grice’s pigeonholes, and Grice never leaves his desk',false]
+   :['Find someone who can write in Colonel James’s hand. Mrs Hatch in Leather Lane knows everybody who does anything doubtful',false]);
+  g.push(has('theodolite')?['Redeemed Bevan’s theodolite',true]
+   :['Something to survey with. Bevan pawned his own theodolite at Mrs Hatch’s, Leather Lane, and I have his ticket. Ten and six to redeem it',false]);
+  g.push(has('rticket')?['Bought a ticket to Cardiff',true]
+   :G.money<270?['Raise the fare to Cardiff: second class is £1 2s 6d and I have '+lsd(G.money)+'. Something to pawn?',false]
+   :['Buy a ticket at the Paddington booking office',false]);
+  if(g.every(x=>x[1]))g.push(['Catch the down mail at Paddington',false])}
+ else if(has('notebook'))g.push([has('graphite')?'Bevan tore pages out of his field book. He pressed hard; rub the page beneath with my soft graphite':'Bevan tore pages out of his field book. He pressed hard; a rubbing of the page beneath might show it. My soft graphite is in my table drawer',false]);
+ return [...g.filter(x=>!x[1]),...g.filter(x=>x[1])]}
+function renderPanel(){
+ let h='';
+ if(tab==='satchel'){
+  h=`<h2>Satchel</h2><div class="sub2">${sel?'Choose something to use it with':'Choose an item to look at it or use it'}</div><div class="items">${G.inv.map(i=>`<button class="item${pick===i||sel===i?' sel':''}" data-i="${i}"><svg viewBox="0 0 48 48">${IC[i]}</svg>${ITEMS[i].name}</button>`).join('')}</div>`;
+  if(pick&&has(pick))h+=`<p class="desc">${ITEMS[pick].look}</p><div class="btnrow"><button class="btn" data-act="use">Use with…</button></div>`}
+ else if(tab==='pocket'){h=`<h2>Pocketbook</h2><div class="sub2">${lsd(G.money)} in my pocket</div><div class="list">${goalsList().map(([t,d])=>`<div class="goal${d?' done':''}"><i></i><span>${t}</span></div>`).join('')}</div><div class="btnrow" style="margin-top:22px"><button class="btn" data-act="restart">Start the prologue again</button></div>`}
+ else if(tab==='ledger'){h=`<h2>Ledger</h2><div class="sub2">People, and what they’re good for</div><div class="list">${G.ledger.map(id=>`<div class="row"><b>${LEDGER[id][0]}</b><span>${LEDGER[id][1]}</span></div>`).join('')}</div>`}
+ else if(tab==='secrets'){h=`<h2>Secrets</h2><div class="sub2">Mine, and other people’s</div>${G.secrets.length?`<div class="list">${G.secrets.map(id=>`<div class="row"><b>${SECRETS[id][0]}</b><span>${SECRETS[id][1]}</span></div>`).join('')}</div>`:'<p class="empty">Nothing yet. An honest man, so far.</p>'}`}
+ panel.innerHTML=h;
+ panel.querySelectorAll('.item').forEach(b=>b.onclick=e=>{e.stopPropagation();const i=b.dataset.i;
+  if(sel&&sel!==i){const a=sel;setSel(null);closePanel();run(()=>combine(a,i));return}
+  pick=i;renderPanel()});
+ const u=panel.querySelector('[data-act="use"]');if(u)u.onclick=e=>{e.stopPropagation();setSel(pick);closePanel()};
+ const r=panel.querySelector('[data-act="restart"]');if(r)r.onclick=e=>{e.stopPropagation();if(r.dataset.sure){try{localStorage.removeItem(SAVE)}catch(_){}location.reload()}else{r.dataset.sure=1;r.textContent='Tap again to lose your progress'}};
+}
+const purseEl=document.getElementById('purse');
+let lastGoals=null;
+function ui(){
+ const gk=goalsList().filter(x=>!x[1]).map(x=>x[0]).join('|');if(lastGoals!==null&&gk!==lastGoals)bump('pocket');lastGoals=gk;
+ purseEl.innerHTML=`<b>${lsd(G.money)}</b> · a draughtsman`;
+ document.getElementById('bSatchel').textContent=G.inv.length||'';
+ document.getElementById('bLedger').textContent=G.seen.ledger===false?'•':'';
+ document.getElementById('bSecrets').textContent=G.secrets.length||'';
+ if(tab)renderPanel()}
+
+/* ================= scenes ================= */
+const SC={};
+let scene=null;
+function curScene(){return SC[G.scene]}
+
+/* ---------- OFFICE ---------- */
+const rainDrops=Array.from({length:60},(_,i)=>({x:(i*53.7)%280,y:(i*97.3)%440,v:.25+((i*7)%10)/30}));
+/* the office desks are a matching pair: a sloped top on a drawer apron and four turned legs */
+function deskFrame(x0,x1,top,apron){const W='#5e3e26',L='#a0703f',D='#2a1a10';
+ ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse((x0+x1)/2,701,(x1-x0)/2+6,5,0,0,Math.PI*2);ctx.fill();
+ const leg=(x,back)=>{ctx.fillStyle=back?D:W;ctx.fillRect(x-4,top+apron,8,700-top-apron);ctx.beginPath();ctx.ellipse(x,top+apron+12,5.5,6,0,0,Math.PI*2);ctx.fill();ctx.fillRect(x-5,690,10,10);
+  if(!back){ctx.fillStyle=L;ctx.fillRect(x-3,top+apron+20,2,662-top-apron);ctx.beginPath();ctx.ellipse(x-1.5,top+apron+11,1.6,3.5,0,0,Math.PI*2);ctx.fill()}};
+ leg(x0+22,1);leg(x1-22,1);
+ ctx.fillStyle=D;ctx.fillRect(x0+10,678,x1-x0-20,5);
+ leg(x0+8,0);leg(x1-8,0);
+ rimFill(P(p=>p.rect(x0,top,x1-x0,apron)),W,L,0,1.5)}
+function officeBg(t){
+ const o=off(.25);ctx.save();ctx.translate(o.x,o.y);
+ ctx.fillStyle=lg(0,0,0,700,['#3b4339','#4f584b','#545d50']);ctx.fillRect(-1600,-400,5200,1100);
+ ctx.fillStyle='rgba(255,255,255,.028)';for(let x=-600;x<2200;x+=36)ctx.fillRect(x,40,15,516);
+ ctx.fillStyle='#262a24';ctx.fillRect(-1600,-400,5200,430);ctx.fillStyle='#6c7264';ctx.fillRect(-1600,26,5200,6);ctx.fillStyle='#2c2820';ctx.fillRect(-1600,128,5200,5);
+ ctx.fillStyle='#38281b';ctx.fillRect(-1600,558,5200,160);ctx.fillStyle='#5c4632';ctx.fillRect(-1600,554,5200,6);
+ ctx.strokeStyle='rgba(0,0,0,.28)';ctx.lineWidth=2;for(let x=-560;x<2200;x+=120)ctx.strokeRect(x,574,100,108);
+ /* window */
+ ctx.fillStyle='#cdc4b0';ctx.fillRect(588,108,304,466);ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(596,116,288,450);
+ ctx.save();ctx.beginPath();ctx.rect(600,120,280,440);ctx.clip();
+ ctx.fillStyle=lg(0,120,0,560,['#8d989d','#a8b0b0','#b9beba']);ctx.fillRect(600,120,280,440);
+ ctx.fillStyle='rgba(110,120,126,.75)';ctx.fillRect(712,178,32,400);ctx.beginPath();ctx.moveTo(712,178);ctx.lineTo(728,132);ctx.lineTo(744,178);ctx.fill();
+ ctx.fillStyle='rgba(232,224,200,.75)';ctx.beginPath();ctx.arc(728,212,10,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='rgba(96,104,110,.85)';ctx.beginPath();ctx.moveTo(600,470);for(const[x,y]of[[630,470],[630,430],[660,430],[660,450],[700,450],[700,410],[760,410],[760,440],[800,440],[800,400],[812,400],[812,380],[824,380],[824,400],[880,400],[880,560],[600,560]])ctx.lineTo(x,y);ctx.fill();
+ ctx.fillStyle='rgba(225,230,230,.28)';ctx.fillRect(600,120,280,440);
+ ctx.strokeStyle='rgba(235,240,245,.35)';ctx.lineWidth=1;ctx.beginPath();
+ for(const d of rainDrops){const y=120+((d.y+(reduce?0:t*d.v))%440);ctx.moveTo(600+d.x,y);ctx.lineTo(598+d.x,y+16)}ctx.stroke();
+ ctx.restore();
+ ctx.strokeStyle='#d6cdb8';ctx.lineWidth=5;ctx.beginPath();for(const x of[693,787]){ctx.moveTo(x,120);ctx.lineTo(x,560)}for(const y of[228,450])ctx.moveTo(600,y),ctx.lineTo(880,y);ctx.stroke();
+ ctx.fillStyle='#d6cdb8';ctx.fillRect(600,334,280,12);ctx.fillStyle='#bdb39d';ctx.fillRect(584,560,312,16);
+ glow(740,340,460,'200,214,228',.07);
+ /* door */
+ ctx.fillStyle='#2a180f';ctx.fillRect(30,392,132,308);
+ ctx.fillStyle='rgba(190,198,192,.55)';ctx.fillRect(42,402,108,26);ctx.strokeStyle='#2a180f';ctx.lineWidth=2;ctx.beginPath();for(const x of[78,114])ctx.moveTo(x,402),ctx.lineTo(x,428);ctx.stroke();
+ rimFill(P(p=>p.rect(40,438,112,262)),'#3a2216','#7a4a2c',-3,1);
+ ctx.fillStyle='rgba(205,210,200,.78)';ctx.fillRect(52,450,88,92);
+ ctx.save();ctx.translate(96,492);ctx.scale(-1,1);ctx.fillStyle='rgba(40,30,20,.75)';ctx.font='600 11px "IM Fell English",Georgia,serif';ctx.textAlign='center';ctx.fillText('HALLAM & PIKE',0,0);ctx.font='italic 9px "IM Fell English",Georgia,serif';ctx.fillText('Mining Engineers',0,14);ctx.restore();
+ ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=2;ctx.strokeRect(52,560,88,128);ctx.fillStyle='#c9a060';ctx.beginPath();ctx.arc(144,580,4,0,Math.PI*2);ctx.fill();
+ /* stove */
+ ctx.fillStyle='#211e1b';ctx.fillRect(330,-400,14,960);
+ rimFill(P(p=>{p.roundRect?p.roundRect(304,566,66,128,8):p.rect(304,566,66,128)}),'#1c1a18','#5a5550',-3,0);
+ ctx.fillStyle='#2a2724';ctx.fillRect(298,560,78,10);
+ const fl=reduce?1:.85+.15*Math.sin(t*.013)*Math.sin(t*.0071);
+ ctx.fillStyle=`rgba(255,${120+40*fl|0},50,${.85*fl})`;ctx.fillRect(322,628,30,22);ctx.strokeStyle='#1c1a18';ctx.lineWidth=2;for(let x=328;x<352;x+=6){ctx.beginPath();ctx.moveTo(x,628);ctx.lineTo(x,650);ctx.stroke()}
+ glow(337,640,150,'255,130,60',.16*fl);
+ ctx.fillStyle='#1a1816';ctx.beginPath();ctx.moveTo(382,700);ctx.lineTo(386,662);ctx.lineTo(420,662);ctx.lineTo(424,700);ctx.fill();ctx.fillStyle='#0c0a09';for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(390+i*6,662-(i%2)*3,4,0,Math.PI*2);ctx.fill()}
+ /* Crane's drafting table */
+ deskFrame(434,586,604,22);
+ rimFill(P(p=>{p.moveTo(430,606);p.lineTo(590,606);p.lineTo(576,520);p.lineTo(444,520);p.closePath()}),'#5a4028','#8a6a48',0,2);
+ ctx.fillStyle='#ebe4d1';ctx.beginPath();ctx.moveTo(440,600);ctx.lineTo(580,600);ctx.lineTo(569,528);ctx.lineTo(451,528);ctx.closePath();ctx.fill();
+ {ctx.save();ctx.beginPath();ctx.moveTo(440,600);ctx.lineTo(580,600);ctx.lineTo(569,528);ctx.lineTo(451,528);ctx.closePath();ctx.clip();
+  const ink='rgba(40,52,84,.85)',pen='rgba(90,84,76,.45)';
+  if(!has('drawing')&&!F('drawingTaken')){
+   /* border and title block */
+   ctx.strokeStyle=ink;ctx.lineWidth=.9;ctx.strokeRect(455,532,110,64);ctx.strokeRect(538,584,27,12);
+   ctx.fillStyle=ink;for(const[y,w]of[[588,18],[591,14],[594,20]])ctx.fillRect(541,y,w,.8);
+   /* faint pencil grid */
+   ctx.strokeStyle=pen;ctx.lineWidth=.4;for(let x=465;x<565;x+=10){ctx.beginPath();ctx.moveTo(x,533);ctx.lineTo(x,583);ctx.stroke()}
+   /* coal pillars left standing, hatched in pencil */
+   ctx.fillStyle='rgba(60,56,52,.28)';for(let r=0;r<2;r++)for(let c=0;c<5;c++)ctx.fillRect(480+c*15,545+r*12,11,8);
+   /* main heading and return airway, double-lined, with cross-cuts */
+   ctx.strokeStyle=ink;ctx.lineWidth=.8;for(const y of[539,541.5,569,571.5]){ctx.beginPath();ctx.moveTo(470,y);ctx.lineTo(558,y);ctx.stroke()}
+   for(let x=477;x<556;x+=15){ctx.beginPath();ctx.moveTo(x,541.5);ctx.lineTo(x,569);ctx.moveTo(x+2.5,541.5);ctx.lineTo(x+2.5,569);ctx.stroke()}
+   /* downcast and upcast shafts */
+   for(const[y,lbl]of[[540,'D'],[570,'U']]){ctx.fillStyle='#ebe4d1';ctx.beginPath();ctx.arc(466,y,4,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=ink;ctx.font='600 4px Georgia,serif';ctx.textAlign='center';ctx.fillText(lbl,466,y+1.5)}
+   /* the air current, in red: in at the downcast, round the workings, out at the upcast */
+   ctx.strokeStyle='rgba(170,50,40,.8)';ctx.fillStyle='rgba(170,50,40,.8)';ctx.lineWidth=.7;
+   const arrow=(x,y,dx,dy)=>{ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+dx*6,y+dy*6);ctx.stroke();ctx.beginPath();ctx.moveTo(x+dx*8,y+dy*8);ctx.lineTo(x+dx*5-dy*2,y+dy*5+dx*2);ctx.lineTo(x+dx*5+dy*2,y+dy*5-dx*2);ctx.closePath();ctx.fill()};
+   arrow(474,540,1,0);arrow(506,540,1,0);arrow(538,540,1,0);arrow(558,546,0,1);arrow(558,557,0,1);arrow(544,570,-1,0);arrow(512,570,-1,0);arrow(482,570,-1,0);
+   /* compass needle and scale bar */
+   ctx.strokeStyle=ink;ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(560,535);ctx.lineTo(560,543);ctx.stroke();ctx.fillStyle=ink;ctx.beginPath();ctx.moveTo(560,533);ctx.lineTo(558.6,536);ctx.lineTo(561.4,536);ctx.closePath();ctx.fill();
+   for(let k=0;k<4;k++){ctx.fillStyle=k%2?'#ebe4d1':ink;ctx.fillRect(470+k*6,588,6,1.6)}ctx.strokeRect(470,588,24,1.6);
+  }else{
+   /* a fresh sheet, a few pencil lines begun */
+   ctx.strokeStyle=pen;ctx.lineWidth=.5;ctx.strokeRect(455,532,110,64);for(const y of[548,556]){ctx.beginPath();ctx.moveTo(470,y);ctx.lineTo(520,y);ctx.stroke()}}
+  ctx.restore()}
+ ctx.fillStyle='#c9a060';for(const[x,y]of[[452,532],[566,532],[446,594],[574,594]]){ctx.beginPath();ctx.arc(x,y,1.8,0,Math.PI*2);ctx.fill()}
+ ctx.strokeStyle='#7a5a38';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(436,580);ctx.lineTo(586,580);ctx.stroke();
+ ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1.5;ctx.strokeRect(470,608,80,13);ctx.fillStyle='#c9a060';ctx.beginPath();ctx.arc(510,614.5,2.6,0,Math.PI*2);ctx.fill();
+ /* gas brackets */
+ for(const x of[566,1150]){ctx.strokeStyle='#8a6a3a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,420);ctx.quadraticCurveTo(x+14,404,x+10,386);ctx.stroke();ctx.fillStyle='rgba(230,226,214,.7)';ctx.beginPath();ctx.ellipse(x+10,374,9,12,0,0,Math.PI*2);ctx.fill()}
+ /* map */
+ rimFill(P(p=>p.rect(908,148,224,190)),'#6a4a22','#c9a060',-2,2);
+ ctx.fillStyle='#e6dcc2';ctx.fillRect(918,158,204,170);
+ {ctx.save();ctx.translate(918,158);ctx.beginPath();ctx.rect(0,0,204,170);ctx.clip();
+  const poly=(pts)=>{ctx.beginPath();ctx.moveTo(...pts[0]);for(const p of pts.slice(1))ctx.lineTo(...p);ctx.closePath()};
+  /* the land north of the coalfield: Old Red Sandstone, tinted as the Survey did */
+  ctx.fillStyle='#d9b9a0';ctx.fillRect(0,18,204,130);
+  /* the coalfield: a long basin, Pontypool in the east to St Brides Bay in the west */
+  const rim=[[22,100],[30,92],[44,86],[60,79],[80,72],[104,66],[130,62],[156,62],[178,66],[194,76],[198,92],[190,106],[172,116],[150,124],[130,128],[110,132],[96,136],[82,134],[66,132],[48,128],[34,120]];
+  const toward=(pts,k)=>pts.map(([x,y])=>[118+(x-118)*k,96+(y-96)*k]);
+  poly(rim);ctx.fillStyle='#9fb0bd';ctx.fill();                 /* Carboniferous Limestone rim */
+  poly(toward(rim,.93));ctx.fillStyle='#b9b2a2';ctx.fill();     /* Millstone Grit */
+  poly(toward(rim,.86));ctx.fillStyle='#3f3c39';ctx.fill();     /* the Coal Measures */
+  poly(toward(rim,.55));ctx.fillStyle='#5e5953';ctx.fill();     /* Pennant sandstone in the middle */
+  ctx.strokeStyle='rgba(30,26,22,.55)';ctx.lineWidth=.6;poly(rim);ctx.stroke();
+  poly([[0,100],[6,96],[14,97],[16,102],[8,106],[0,106]]);ctx.fillStyle='#3f3c39';ctx.fill();ctx.strokeStyle='#9fb0bd';ctx.lineWidth=1.2;ctx.stroke();
+  /* the sea: Bristol Channel, Swansea Bay, the Gower, Carmarthen Bay */
+  const coast=[[0,112],[8,108],[18,112],[26,118],[38,120],[48,118],[56,124],[60,132],[70,136],[80,132],[84,126],[90,122],[96,128],[104,134],[118,138],[134,141],[146,146],[160,147],[176,150],[204,152],[204,170],[0,170]];
+  poly(coast);ctx.fillStyle='#b8cbd3';ctx.fill();ctx.strokeStyle='rgba(40,60,80,.6)';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(...coast[0]);for(const p of coast.slice(1,20))ctx.lineTo(...p);ctx.stroke();
+  ctx.strokeStyle='rgba(60,90,120,.25)';ctx.lineWidth=.5;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(0,112+k*5);for(const p of coast.slice(1,20))ctx.lineTo(p[0],p[1]+k*5);ctx.stroke()}
+  /* the valleys: rivers running south across the coalfield to the sea */
+  ctx.strokeStyle='rgba(90,140,180,.95)';ctx.lineWidth=.8;
+  for(const r of[[[78,66],[80,96],[84,124]],[[94,64],[96,98],[94,122]],[[126,58],[132,98],[142,124]],[[144,58],[146,98],[150,144]],[[174,62],[176,100],[172,140]]]){ctx.beginPath();ctx.moveTo(...r[0]);ctx.quadraticCurveTo(...r[1],...r[2]);ctx.stroke()}
+  /* towns */
+  const town=(x,y,n,dx=4,dy=-2)=>{ctx.fillStyle='#7a1e14';ctx.beginPath();ctx.arc(x,y,1.6,0,Math.PI*2);ctx.fill();if(n){ctx.fillStyle='#2a1e14';ctx.font='italic 5.5px "IM Fell English",Georgia,serif';ctx.textAlign='left';ctx.fillText(n,x+dx,y+dy)}};
+  town(146,64,'Merthyr',-26,-3);town(150,144,'Cardiff',4,3);town(84,124,'Swansea',-26,6);town(140,108,'');town(196,82,'Pontypool',-24,-21);town(50,118,'Llanelly',-22,8);town(98,122,'');
+  /* title cartouche, compass and scale */
+  ctx.fillStyle='#e6dcc2';ctx.fillRect(0,0,204,18);ctx.strokeStyle='rgba(60,40,20,.7)';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(0,18);ctx.lineTo(204,18);ctx.stroke();
+  ctx.fillStyle='#3a2a1a';ctx.textAlign='center';ctx.font='600 7.5px "IM Fell English",Georgia,serif';ctx.fillText('THE SOUTH WALES COAL FIELD',102,9);
+  ctx.font='italic 5px "IM Fell English",Georgia,serif';ctx.fillText('Geological Survey of Great Britain',102,15.5);
+  ctx.fillStyle='#3a2a1a';ctx.beginPath();ctx.moveTo(190,24);ctx.lineTo(187,34);ctx.lineTo(190,31);ctx.lineTo(193,34);ctx.closePath();ctx.fill();ctx.font='600 5px Georgia,serif';ctx.fillText('N',190,40);
+  for(let k=0;k<4;k++){ctx.fillStyle=k%2?'#e6dcc2':'#3a2a1a';ctx.fillRect(10+k*8,160,8,2)}ctx.strokeStyle='#3a2a1a';ctx.lineWidth=.5;ctx.strokeRect(10,160,32,2);ctx.font='italic 4.5px "IM Fell English",Georgia,serif';ctx.textAlign='left';ctx.fillStyle='#2a1e14';ctx.fillText('Miles',44,163);
+  /* key */
+  for(const[i,c,n]of[[0,'#3f3c39','Coal Measures'],[1,'#9fb0bd','Limestone'],[2,'#d9b9a0','Old Red Sandstone']]){ctx.fillStyle=c;ctx.fillRect(10,24+i*7,7,4.5);ctx.strokeStyle='rgba(40,30,20,.5)';ctx.strokeRect(10,24+i*7,7,4.5);ctx.fillStyle='#2a1e14';ctx.fillText(n,20,28+i*7)}
+  ctx.restore()}
+ /* Bevan's desk */
+ {const W='#5e3e26',L='#a0703f',D='#2a1a10';
+  ctx.fillStyle=D;ctx.fillRect(1090,632,6,68);ctx.fillRect(1126,632,6,68);
+  ctx.fillStyle=W;ctx.fillRect(1098,548,6,152);ctx.fillRect(1134,548,6,152);ctx.fillStyle=L;ctx.fillRect(1099,556,1.5,140);ctx.fillRect(1135,556,1.5,140);
+  rimFill(P(p=>{p.moveTo(1094,546);p.quadraticCurveTo(1119,536,1144,546);p.lineTo(1144,556);p.quadraticCurveTo(1119,546,1094,556);p.closePath()}),W,L,0,1.5);
+  ctx.fillStyle=W;for(const x of[1110,1119,1128])ctx.fillRect(x-1.5,552,3,76);
+  rimFill(P(p=>p.rect(1086,626,62,9)),W,L,0,1.5);ctx.fillStyle=D;ctx.fillRect(1092,672,46,4)}
+ deskFrame(930,1110,598,22);
+ rimFill(P(p=>{p.moveTo(926,600);p.lineTo(1114,600);p.lineTo(1104,572);p.lineTo(936,572);p.closePath()}),'#4c2e1c','#8a5a34',0,2);
+ ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1.5;ctx.strokeRect(950,602,62,13);ctx.strokeRect(1028,602,62,13);ctx.fillStyle='#c9a060';for(const x of[981,1059]){ctx.beginPath();ctx.arc(x,608.5,2.4,0,Math.PI*2);ctx.fill()}
+ if(!F('searched')){ctx.fillStyle='#4a3424';ctx.fillRect(956,580,30,12);ctx.fillStyle='#f0ead8';ctx.save();ctx.translate(1006,584);ctx.rotate(-.08);ctx.fillRect(0,0,30,14);ctx.restore();
+  ctx.fillStyle='#0d0b0a';ctx.beginPath();ctx.moveTo(1050,592);ctx.lineTo(1056,580);ctx.lineTo(1068,582);ctx.lineTo(1072,592);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(200,210,220,.7)';ctx.fillRect(1058,583,4,2);
+  ctx.strokeStyle='#8a8478';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(1076,590);ctx.lineTo(1098,584);ctx.stroke();
+  ctx.strokeStyle='rgba(200,200,190,.8)';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(992,578,4,0,Math.PI*2);ctx.moveTo(1004,578);ctx.arc(1000,578,4,0,Math.PI*2);ctx.stroke()}
+ /* tea chest */
+ if(!F('boxed')){rimFill(P(p=>p.rect(1146,628,64,72)),'#8a6a44','#c9a474',-3,1);ctx.strokeStyle='rgba(60,40,20,.5)';ctx.lineWidth=2;ctx.strokeRect(1146,628,64,72);ctx.beginPath();ctx.moveTo(1146,664);ctx.lineTo(1210,664);ctx.stroke();
+  ctx.fillStyle='rgba(40,30,20,.55)';ctx.font='9px "IM Fell English",Georgia,serif';ctx.fillText('ASSAM',1178,686)}
+ /* pigeonholes */
+ rimFill(P(p=>p.rect(1220,186,214,236)),'#33231a','#6a4a30',-2,1);
+ const r=rng(3);for(let cy=0;cy<4;cy++)for(let cx=0;cx<6;cx++){const x=1228+cx*34,y=194+cy*56;ctx.fillStyle='#160e09';ctx.fillRect(x,y,30,50);if(r()>.25){ctx.fillStyle=r()>.5?'#e0d6bf':'#cfc2a4';ctx.fillRect(x+3,y+14+r()*14,24,36-r()*10)}}
+ if(!F('osTaken')){ctx.fillStyle='#f2ecdc';ctx.fillRect(1366,250,26,8)}
+ /* speaking tube */
+ ctx.strokeStyle='#9a7a44';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(1452,-400);ctx.lineTo(1452,334);ctx.stroke();ctx.strokeStyle='rgba(255,230,170,.4)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(1450,-400);ctx.lineTo(1450,330);ctx.stroke();
+ ctx.fillStyle='#b8925a';ctx.beginPath();ctx.moveTo(1444,334);ctx.lineTo(1460,334);ctx.lineTo(1466,354);ctx.lineTo(1438,354);ctx.closePath();ctx.fill();ctx.fillStyle='#3a2a18';ctx.beginPath();ctx.ellipse(1452,354,14,3,0,0,Math.PI*2);ctx.fill();
+ /* Grice desk + Grice */
+ if(!F('griceAway'))person(1330,604,.84,{id:'grice',head:1.25,coat:'#24221f',rim:'#8a8478',arms:'front',specs:1,hair:'#8a847a',whiskers:'#8a847a',flip:1,ph:1.3},t);
+ else{ctx.fillStyle='#2a1a10';ctx.fillRect(1306,556,48,8);ctx.fillRect(1310,564,5,40);ctx.fillRect(1346,564,5,40)}
+ rimFill(P(p=>p.rect(1240,520,190,180)),'#3e2818','#7a4c2c',-2,1);
+ rimFill(P(p=>{p.moveTo(1234,522);p.lineTo(1436,522);p.lineTo(1426,500);p.lineTo(1244,500);p.closePath()}),'#4a2e1c','#8a5a34',0,2);
+ ctx.fillStyle='#ece4cc';ctx.fillRect(1290,502,70,12);ctx.fillStyle='#1a1410';ctx.fillRect(1380,496,10,8);
+ ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1.5;ctx.strokeRect(1256,540,74,140);ctx.strokeRect(1340,540,74,140);
+ /* instrument cupboard */
+ rimFill(P(p=>p.rect(1476,168,170,532)),'#3a2214','#7a4a2c',-3,1);
+ ctx.fillStyle='rgba(30,40,44,.85)';ctx.fillRect(1488,188,70,370);ctx.fillRect(1564,188,70,370);
+ ctx.fillStyle='#5a3a22';ctx.fillRect(1488,300,146,5);ctx.fillRect(1488,430,146,5);
+ {ctx.strokeStyle='#d8b06a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(1512,430);ctx.lineTo(1512,404);ctx.stroke();ctx.fillStyle='#c9a060';ctx.fillRect(1494,394,40,9);ctx.beginPath();ctx.arc(1512,410,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff6d8';ctx.fillRect(1500,395,24,2)}
+ ctx.fillStyle='#8a7a5a';ctx.fillRect(1576,410,46,8);ctx.strokeStyle='#8a8070';ctx.lineWidth=2;ctx.beginPath();ctx.arc(1530,280,14,0,Math.PI*2);ctx.arc(1600,282,10,0,Math.PI*2);ctx.stroke();
+ ctx.fillStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.moveTo(1490,190);ctx.lineTo(1520,190);ctx.lineTo(1490,330);ctx.fill();ctx.beginPath();ctx.moveTo(1566,190);ctx.lineTo(1590,190);ctx.lineTo(1566,300);ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=1.5;ctx.strokeRect(1488,576,70,110);ctx.strokeRect(1564,576,70,110);ctx.fillStyle='#c9a060';ctx.fillRect(1558,560,6,8);
+ /* Tom */
+ person(236,700,.8,{id:'tom',coat:'#3a3530',rim:'#8a8070',hat:'cap',hatC:'#2a2622',short:1,skin:'#e0b090',hair:'#5a3a22',ph:2.2},t);
+ ctx.restore();
+ /* floor */
+ ctx.fillStyle=lg(0,700,0,1000,['#3a2b1e','#21170f']);ctx.fillRect(-1600,700,5200,800);
+ ctx.strokeStyle='rgba(0,0,0,.28)';ctx.lineWidth=1.2;for(let x=-6000;x<7600;x+=60){ctx.beginPath();ctx.moveTo(800+(x-800)*.25,700);ctx.lineTo(x,1000);ctx.stroke()}
+ ctx.fillStyle='rgba(200,214,228,.06)';ctx.beginPath();ctx.moveTo(610,700);ctx.lineTo(880,700);ctx.lineTo(1060,900);ctx.lineTo(600,900);ctx.fill();
+ ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(-1600,700,5200,8)}
+
+SC.office={title:'Bevan’s box',place:'9 Great George Street, Westminster · September 1869',walk:[150,1460],enter:420,pal:'day',amb:'rain',bg:officeBg,
+ hs:[
+ {id:'door',name:'Door to the stairs',x:30,y:392,w:132,h:308,wx:180,exit:()=>openMap(),dir:'left'},
+ {id:'tom',name:'Tom, the office boy',x:200,y:480,w:74,h:220,wx:300,verbs:()=>[['Talk',talkTom],G.money>=1&&!F('tomSent')&&F('rubbed')&&!F('osTaken')?['Give a penny',pennyTom]:null],
+  use:{coal:async()=>{await line('Tom','Is that for the stove, sir? Bit small.');await speak('No, Tom. It’s for later.')},watch:async()=>{await line('Tom','Nice watch, sir. Shame it don’t go.')},humbug:()=>say('Not where Tom can see it. He’d have it in his mouth before it left my hand.')}},
+ {id:'stove',name:'Stove',x:296,y:556,w:84,h:144,wx:360,verbs:()=>[['Look',()=>say('Coal in September. Mr Grice says the damp gets into the drawings, and Mr Grice is always right.')]],
+  use:{coal:()=>say('Burn it? Not in here. If it’s what I think, I want it whole, and I want a coal man to see it.')}},
+ {id:'table',name:'My drafting table',x:430,y:516,w:166,h:120,wx:510,verbs:()=>[['Look',()=>say('Eleven years at this table. Other men’s mines, other men’s money, drawn very neatly.')],!F('drawer')?['Open drawer',openDrawer]:null]},
+ {id:'window',name:'Window',x:588,y:108,w:304,h:466,wx:740,verbs:()=>[['Look',()=>say('Rain on Westminster. The clock tower is a grey ghost today.')]]},
+ {id:'map',name:'Map of the South Wales coalfield',x:908,y:148,w:224,h:190,wx:1020,verbs:()=>[['Look',()=>say('The Geological Survey’s map. A great black basin of coal from Pontypool to St Brides Bay, and the valleys cut into it like fingers.')]]},
+ {id:'bevan',name:'Mr Bevan’s desk',x:926,y:500,w:212,h:200,wx:1010,verbs:()=>[['Look',()=>say('Thirty years at this desk. He died at it on Tuesday, between one sentence and the next. Nobody has sat there since.')],!F('searched')?['Clear the desk',searchDesk]:null]},
+ {id:'chest',name:'Tea chest',x:1142,y:620,w:72,h:80,wx:1150,show:()=>!F('boxed'),verbs:()=>[['Look',()=>say(F('inL')||F('inS')?'Half packed. Thirty years of a man, and room to spare.':'An empty tea chest from the clerks’ room. It still smells of Assam.')],F('inL')&&F('inS')?['Nail it shut',closeBox]:null],
+  use:{bletter:()=>packIn('bletter'),specs:()=>packIn('specs'),notebook:async()=>{await say('His field book. By rights it goes in with the rest.');await sleep(500);await say(F('rubbed')?'…No. Not now I know what was on those torn pages.':'…But four pages are torn out of it. Josiah never tore a page in his life. Not until I know why.')},coal:()=>say(F('rubbed')?'His coal sample? No. That stays with me.':'A lump of coal, labelled and kept for eighteen years. Nobody keeps coal for eighteen years. Not until I know why.'),graphite:()=>say('That’s mine, not his.'),bticket:async()=>{await say('His ticket. By rights it goes in with his things, and she can redeem his theodolite herself.');await sleep(500);await say(F('rubbed')?'…Or I can use it, where he left off.':'…But a surveyor doesn’t pawn his own instrument for nothing. I’ll hold on to it, until I know what he was about.')}}},
+ {id:'pigeon',name:'Correspondence',x:1220,y:186,w:214,h:236,wx:1300,verbs:()=>[['Look',()=>say('The firm’s correspondence, filed by Mr Grice, by year, by client, by the will of God.')],!F('osTaken')?['Search',async()=>F('rubbed')?searchPigeon():say('Other men’s letters. Nothing in there I need.')]:null]},
+ {id:'grice',name:'Mr Grice, chief clerk',x:1270,y:380,w:120,h:140,wx:1210,show:()=>!F('griceAway'),verbs:()=>[['Talk',talkGrice]],use:{coal:()=>line('Mr Grice','Personal effects go in the box, Mr Crane. Not on my desk.'),notebook:()=>say('Not to Grice. Grice would file it.')}},
+ {id:'tube',name:'Speaking tube',x:1430,y:300,w:46,h:70,wx:1400,verbs:()=>[['Look',()=>say('The speaking tube to Mr Hallam’s room. You blow, it whistles upstairs, and Mr Hallam asks who has disturbed him.')],['Blow',()=>say('And say what? No.')]]},
+ {id:'cup',name:'Instrument cupboard',x:1476,y:168,w:170,h:532,wx:1440,verbs:()=>[['Look',()=>say('Levels, chains, and the firm’s good theodolite, under lock and key. Bevan never used it. He had his own, once.')],['Open',()=>say('Locked. Mr Grice has the key, and Mr Grice has rules.')]]}
+ ]};
+
+async function talkTom(){
+ if(F('osTaken')){await line('Tom','I got a clip round the ear for that, sir. Worth it though.');return}
+ await line('Tom','Mr Bevan used to give me humbugs, sir. Now nobody does.');await speak('Life is hard, Tom.');await line('Tom','It’s harder without humbugs, sir.')}
+async function pennyTom(){
+ await speak('Tom. A penny says Mr Pike wants Mr Grice in the strongroom. Urgently.');
+ await line('Tom','Mr Pike’s in Brighton, sir.');await speak('Mr Grice doesn’t know that.');await line('Tom','…Make it tuppence?');
+ const c=await choose(G.money>=2?['A penny, Tom.','Tuppence, then.']:['A penny, Tom. It’s all I can spare.']);
+ if(c===1){spend(2);await line('Tom','Pleasure doing business, sir.')}else{spend(1);await line('Tom','Robbery, that is.')}
+ flag('tomSent');
+ await line('Tom','Mr GRICE! Mr Pike wants you in the strongroom, sir! Urgent!');
+ await line('Mr Grice','Mr Pike? He wasn’t in this morning…');await line('Mr Grice','Very well. Touch nothing, any of you.');
+ flag('griceAway');await say('Now. Quickly.')}
+async function openDrawer(){flag('drawer');await say('Pencils, a broken rule, and the stick of soft graphite Bevan gave me for taking rubbings.');give('graphite');await say('And a humbug, which I’ll keep from Tom.');give('humbug')}
+async function searchDesk(){
+ flag('searched');await say('His pen tray, his spectacles, a half-written letter.');give('specs');give('bletter');
+ await say('A lump of coal with a paper label. And his field book.');give('coal');give('notebook');
+ await say('And tucked in the field book, a pawn ticket. Mrs Hatch, Leather Lane. “One theodolite, five-inch, in case. J. Bevan.”');give('bticket');
+ await say('His own instrument. He bought it the year I came here, and he never let anyone else carry it. He pawned it in May.')
+ await say('His daughter gets the personal effects. The firm gets nothing. That’s what Grice said.');addLedger('gwen')}
+async function packIn(i){drop(i);flag(i==='bletter'?'inL':'inS');
+ await say(i==='bletter'?'His last letter, unfinished. She should have it.':'His spectacles. One lens cracked.');
+ if(F('inL')&&F('inS'))await say('That’s everything that belongs to her. Everything personal, anyway.')}
+async function closeBox(){
+ await say('Lid on. Twelve nails. Addressed to Mrs Gwen Rees, Pen-y-graig, Cwm Du, near Pontypridd.');flag('boxed');give('box');
+ if(has('notebook')){await say('His notebook is not in it.');addSecret('kept')}}
+async function searchPigeon(){
+ if(!F('griceAway')){await line('Mr Grice','The firm’s correspondence is the firm’s business, Mr Crane.');await say('He hasn’t looked up. He never needs to. If something called him away from that desk for a minute… Tom would shout anything for a penny.');return}
+ await say('Southampton… Ordnance Survey… here.');give('osletter');flag('osTaken');
+ await say('The Colonel’s own hand, on government paper. I can draw a coal seam, but I can’t write like a colonel.');
+ await say('Leather Lane is full of men who can, though. And Mrs Hatch knows every one of them.');
+ await sleep(300);await line('Mr Grice','Mr Pike is in Brighton, Thomas.');await line('Tom','Must’ve been Mr Bevan’s ghost, sir.');await line('Mr Grice','Ghosts do not shout up stairwells.');flag('griceAway',false);addLedger('tom')}
+async function talkGrice(){
+ const errs=[];
+ if(!F('delivered'))errs.push('The letter to Mr Dobbs at the Coal Exchange, by hand, today.');
+ if(!F('boxed'))errs.push('Mr Bevan’s personal effects boxed up for his daughter. The tea chest is by his desk. The firm’s papers stay here.');
+ if(!F('sent'))errs.push(F('boxed')?'That box to the parcels office at Paddington. The Post Office does not take parcels, Mr Crane, whatever you young men think.':'Then the box to the parcels office at Paddington. The Post Office does not take parcels, Mr Crane, whatever you young men think.');
+ const opts=['About Mr Bevan.','About the instrument cupboard.'];if(errs.length)opts.push('About my errands.');opts.push('Nothing.');
+ let c=await choose(opts);if(!errs.length&&c===2)c=3;
+ if(c===0){await line('Mr Grice','Thirty years, and never once late. The firm sent a wreath.');await speak('From the petty cash.');await line('Mr Grice','From the petty cash, Mr Crane.')}
+ else if(c===1){await line('Mr Grice','Instruments go out on Mr Hallam’s written order, and only on Mr Hallam’s written order. Signed for in the book.');await say('Bevan never bothered with the firm’s instruments. He had his own, once.')}
+ else if(c===2){for(const e of errs)await line('Mr Grice',e)}}
+/* ---------- COAL EXCHANGE ---------- */
+const crowd=(()=>{const r=rng(19),a=[];for(let i=0;i<22;i++)a.push({x:420+r()*1150,y:690+r()*44,s:.5+r()*.12,ph:r()*6,flip:r()>.5,c:['#1d1a18','#24201c','#191614','#2a2420'][i%4]});return a.sort((a,b)=>a.y-b.y)})();
+function exchangeBg(t){
+ const o=off(.2);ctx.save();ctx.translate(o.x,o.y);
+ ctx.fillStyle=lg(0,-300,0,700,['#e9dcbc','#cdb88e','#9a8460']);ctx.fillRect(-600,-400,2800,1100);
+ glow(800,-80,900,'255,244,214',.4);
+ctx.save();ctx.beginPath();ctx.rect(-600,-400,2800,450);ctx.clip();
+ ctx.strokeStyle='rgba(120,100,70,.3)';ctx.lineWidth=3;for(let i=-8;i<=8;i+=2){ctx.beginPath();ctx.moveTo(800,-260);ctx.lineTo(800+i*170,120);ctx.stroke()}
+ ctx.restore();
+ for(let tier=0;tier<3;tier++){
+  const y=118+tier*140;
+  for(let x=-560;x<2200;x+=160){ctx.fillStyle=['#6a7a62','#7a5a44','#5a6878','#8a7048'][((x/160|0)+tier+20)%4];ctx.globalAlpha=.5;ctx.fillRect(x+26,y-70,108,62);ctx.globalAlpha=1;
+   ctx.strokeStyle='rgba(60,40,20,.3)';ctx.lineWidth=1.5;ctx.strokeRect(x+26,y-70,108,62)}
+  ctx.fillStyle='#2b3236';ctx.beginPath();ctx.moveTo(-600,y);ctx.quadraticCurveTo(800,y+90,2200,y);ctx.lineTo(2200,y+30);ctx.quadraticCurveTo(800,y+120,-600,y+30);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(201,162,74,.55)';ctx.lineWidth=1.5;ctx.beginPath();for(let k=0;k<=60;k++){const u=k/60,x=-600+2800*u,yy=y+180*u*(1-u)+14;k?ctx.lineTo(x,yy):ctx.moveTo(x,yy)}ctx.stroke();
+  ctx.fillStyle='rgba(201,162,74,.8)';for(let k=0;k<=60;k+=4){const u=k/60,x=-600+2800*u,yy=y+180*u*(1-u)+14;ctx.beginPath();ctx.arc(x,yy,2.4,0,Math.PI*2);ctx.fill()}}
+ for(const x of[120,520,1080,1480]){ctx.fillStyle='#2b3236';ctx.fillRect(x-7,380,14,330);ctx.fillStyle='#c9a24a';ctx.fillRect(x-12,378,24,6)}
+ /* entrance */
+ ctx.fillStyle='#4a3e30';ctx.fillRect(10,250,240,460);
+ ctx.fillStyle=lg(0,280,0,700,['#c8d0d2','#9aa4a6']);ctx.beginPath();ctx.moveTo(40,700);ctx.lineTo(40,340);ctx.arc(130,340,90,Math.PI,0);ctx.lineTo(220,700);ctx.fill();
+ ctx.fillStyle='rgba(80,80,80,.5)';ctx.fillRect(40,610,180,90);
+ /* price board */
+ ctx.strokeStyle='#5a4028';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(1000,700);ctx.lineTo(1020,450);ctx.moveTo(1110,700);ctx.lineTo(1090,450);ctx.stroke();
+ rimFill(P(p=>p.rect(976,440,160,170)),'#23282a','#5a4028',0,3);
+ ctx.fillStyle='rgba(240,240,232,.82)';ctx.font='12px "IM Fell English",Georgia,serif';ctx.textAlign='left';
+ [['HETTON WALLSEND','19/6'],['LAMBTON','19/-'],['STEWART’S','19/3'],['HASWELL','18/9'],['WEST HARTLEY','17/-']].forEach(([n,p],i)=>{ctx.fillText(n,988,466+i*28);ctx.textAlign='right';ctx.fillText(p,1126,466+i*28);ctx.textAlign='left'});
+ /* crowd */
+ for(const c of crowd)person(c.x,c.y,.84+(c.y-712)*.004,{coat:c.c,rim:'#a08a64',hat:'top',flip:c.flip,ph:c.ph,shadow:false},t);
+ /* beadle, Dobbs, Vane */
+ person(318,712,.84,{id:'beadle',coat:'#1f2a4a',rim:'#8a94b0',braid:1,hat:'cocked',hatC:'#151a2a',whiskers:'#6a5a4a',ph:.4},t);
+ person(904,736,.86,{id:'dobbs',coat:'#2a2420',rim:'#b09670',stout:1,w:1.12,hat:'top',whiskers:'#9a8a78',chain:1,flip:1,ph:1.1},t);
+ person(1350,734,.92,{id:'vane',coat:'#121012',rim:'#a89a80',w:.88,hat:'top',chain:1,flip:1,ph:2.4,skin:'#d8b294'},t);
+ ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<3;i++){const x=420+i*380+(reduce?0:Math.sin(t*.0003+i)*20);ctx.fillStyle=lg(x,0,x+160,700,['rgba(255,244,214,.10)','rgba(255,244,214,0)']);ctx.beginPath();ctx.moveTo(x,-40);ctx.lineTo(x+90,-40);ctx.lineTo(x+260,760);ctx.lineTo(x+120,760);ctx.fill()}ctx.restore();
+ ctx.restore();
+ /* floor with compass */
+ ctx.fillStyle=lg(0,700,0,1000,['#6a4428','#3a2414']);ctx.fillRect(-600,700,2800,800);
+ ctx.save();ctx.translate(800,812);ctx.scale(1,.18);
+ ctx.fillStyle='#8a5a34';ctx.beginPath();ctx.arc(0,0,640,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#c9965a';ctx.lineWidth=18;ctx.beginPath();ctx.arc(0,0,610,0,Math.PI*2);ctx.stroke();
+ for(let i=0;i<32;i++){const a=i/32*Math.PI*2,long=i%4===0?560:i%2===0?420:300;ctx.fillStyle=i%2?'#5a3418':'#d8a868';ctx.beginPath();ctx.moveTo(Math.cos(a)*long,Math.sin(a)*long);ctx.lineTo(Math.cos(a+.09)*70,Math.sin(a+.09)*70);ctx.lineTo(Math.cos(a-.09)*70,Math.sin(a-.09)*70);ctx.closePath();ctx.fill()}
+ ctx.fillStyle='#3a2414';ctx.beginPath();ctx.arc(0,0,60,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(-600,700,2800,6)}
+SC.exchange={title:'The Coal Exchange',place:'Lower Thames Street, City of London',walk:[170,1480],enter:200,pal:'day',amb:'crowd',bg:exchangeBg,
+ gate:()=>F('admitted')?null:400,
+ hs:[
+ {id:'exit',name:'Way out to Lower Thames Street',x:20,y:250,w:220,h:450,wx:170,exit:()=>openMap(),dir:'left'},
+ {id:'beadle',name:'The beadle',x:278,y:500,w:84,h:220,wx:250,verbs:()=>[['Talk',talkBeadle]],use:{hlletter:showBeadle,forged:()=>say('Not here. That’s for Welsh farmers.'),coal:()=>line('The beadle','Very nice, sir. We have rather a lot of it in here.')}},
+ {id:'dome',name:'The dome',x:420,y:0,w:760,h:96,wx:700,verbs:()=>[['Look',()=>say('Glass and iron, seventy feet up, on ribs like a ship turned over. Prince Albert opened it twenty years ago. They built a cathedral for coal.')]]},
+ {id:'panels',name:'Painted panels',x:40,y:40,w:300,h:200,wx:300,verbs:()=>[['Look',()=>say('Ferns, fossil trees and colliers with their lamps, painted round every gallery. The forests that turned into coal, so a factor can admire his stock.')]]},
+ {id:'board',name:'Price board',x:976,y:440,w:160,h:170,wx:1060,verbs:()=>[['Read',()=>say('Hetton Wallsend, nineteen and six. Lambton, nineteen shillings. All Newcastle coal. London still burns the north. Not a Welsh name on the board.')]]},
+ {id:'crowd',name:'Factors and shippers',x:520,y:560,w:300,h:150,wx:620,verbs:()=>[['Look',()=>say('Factors, fitters and shipowners, all in black, all shouting. Every fire in London is priced in this room.')],['Listen',()=>say('“…the Admiralty’s taking Welsh at Portsmouth again…” “…Vane’s been to Cardiff three times this month…”')]]},
+ {id:'floor',name:'The compass floor',x:300,y:770,w:1000,h:90,wx:800,verbs:()=>[['Look',()=>say('A mariner’s compass in inlaid wood, thousands of pieces. Every point of it leads to money.')]]},
+ {id:'dobbs',name:'Mr Dobbs, coal factor',x:850,y:520,w:110,h:220,wx:800,needs:'admitted',verbs:()=>[['Talk',talkDobbs]],use:{hlletter:deliver,coal:showCoal,notebook:()=>say('Show him the notebook? I might as well hand him the farm.'),forged:()=>say('Not to a coal man.')}},
+ {id:'vane',name:'A tall man in black',x:1300,y:510,w:110,h:230,wx:1250,needs:'admitted',verbs:()=>[['Talk',talkVane]],use:{coal:()=>say('Not to him. Not to him of all people.'),notebook:()=>say('No.')}}
+ ]};
+async function talkBeadle(){
+ if(F('admitted')){await line('The beadle','Mr Dobbs is by the Hetton board, sir.');return}
+ await line('The beadle','Members and their clerks only, sir. This is the Coal Exchange, not the Royal Exchange. We don’t let the public in to gawp.');
+ await speak('I have business here.');await line('The beadle','Then you’ll have something to show for it.')}
+async function showBeadle(){await line('The beadle','Hallam and Pike, for Mr Dobbs, by hand. Very good, sir.');await line('The beadle','Mr Dobbs is on the floor, by the Hetton board. Stout gentleman, can’t miss him.');flag('admitted')}
+async function talkDobbs(){
+ if(!F('delivered')){if(has('hlletter')){await deliver()}else await say('I have nothing for him.');return}
+ if(!F('valued')){await line('Mr Dobbs','Anything else, Mr Crane? I’ve a cargo of Lambton going cold.');if(has('coal'))await say('I’ve something he might look at.');return}
+ await line('Mr Dobbs','Remember what I told you, Mr Crane. Rich man or dead one.')}
+async function deliver(){
+ await speak('Mr Dobbs? From Mr Hallam, by hand.');drop('hlletter');flag('delivered');addLedger('dobbs');
+ await line('Mr Dobbs','Hallam! Wants Welsh prices again, I’ll wager. Everybody wants Welsh prices this year.');
+ await line('Mr Dobbs','Tell him what I told him in March: steam coal is a navy business, and the navy pays.')}
+async function showCoal(){
+ if(!F('delivered')){await say('Hallam’s letter first. One errand at a time.');return}
+ if(F('valued')){await line('Mr Dobbs','Put that away before someone else sees it.');return}
+ await speak('Mr Dobbs. What would you make of this?');
+ await line('Mr Dobbs','Hm.');await line('Mr Dobbs','Where’d you get this?');
+ const c=await choose(['A sample from a client in Kent.','A lump off a barge at Wapping.','It was a dead man’s. I’m sending his things home.']);
+ await line('Mr Dobbs',['Kent! And I’m the Archbishop of Canterbury.','Then that bargeman’s a long way from home.','Then he died knowing something.'][c]);
+ await line('Mr Dobbs','Look at the fracture. Bright as a new shilling, and it doesn’t dirty your fingers. Hard as glass.');
+ await line('Mr Dobbs','That’s Welsh steam coal, Mr Crane, and good of its kind. Burns hot, and hardly any smoke.');
+ await line('Mr Dobbs','The Admiralty takes all it can get. A warship can’t hide behind its own smoke, and the best Welsh raises steam faster than anything from Newcastle.');
+ await line('Mr Dobbs','If you know where there’s a seam of that, you’re either a rich man or a dead one.');
+ await line('Mr Dobbs','See the long fellow by the pillar? Septimus Vane. Taff and Rhondda Coal Company. Buying leases up every valley in Glamorgan.');
+ await line('Mr Dobbs','He’d pay you for that lump. Then he’d make sure nobody paid you for anything again.');
+ flag('valued');addLedger('vane');await speak('Rich man, then.')}
+async function talkVane(){
+ if(!F('admitted')){await say('I can’t get to him from here.');return}
+ if(F('vaneMet')){await line('Septimus Vane','Still here, Mr Crane? My offer stands. Information pays.');return}
+ flag('vaneMet');addLedger('vane');
+ await line('Septimus Vane','You’re Hallam’s man. The draughtsman.');await speak('Elias Crane.');
+ await line('Septimus Vane','Hallam’s been asking about Welsh prices. Is he thinking of Glamorgan, Mr Crane?');
+ const c=await choose(['Mr Hallam doesn’t confide in draughtsmen.','Surrey, I believe.']);
+ await line('Septimus Vane',c?'Surrey. Of course.':'No. I don’t suppose he does.');
+ await line('Septimus Vane','Every valley in Glamorgan will have a pit in ten years. I mean to own the best of them.');
+ await line('Septimus Vane','If you ever hear of one before I do, come and see me. I pay well for information. Once.');
+ await speak('Once. Yes. I imagine you do.')}
+
+/* ---------- PAWNBROKER ---------- */
+const shelfItems=(()=>{const r=rng(31),a=[];for(let row=0;row<3;row++){let x=-560;while(x<2160){const w=26+r()*48,k=r();a.push({row,x,w,k,c:['#5a4a3a','#4a5664','#6a4646','#56603e','#7a6a52'][Math.floor(r()*5)],tag:r()>.4});x+=w+4+r()*10}}return a})();
+function pawnBg(t){
+ const o=off(.25);ctx.save();ctx.translate(o.x,o.y);
+ ctx.fillStyle=lg(0,0,0,700,['#1e150f','#2c2016']);ctx.fillRect(-600,-400,2800,1100);
+ ctx.strokeStyle='#4a3626';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-600,46);ctx.lineTo(2200,46);ctx.stroke();
+ for(let x=-560;x<2200;x+=58){ctx.fillStyle=['#2a2a34','#3a2a22','#2a3428','#382e2a'][(x/58|0)&3];ctx.beginPath();ctx.moveTo(x,46);ctx.lineTo(x+46,46);ctx.lineTo(x+50,150);ctx.lineTo(x-4,150);ctx.closePath();ctx.fill()}
+ for(let row=0;row<3;row++){const y=272+row*118;ctx.fillStyle='#4a3424';ctx.fillRect(-600,y,2800,8)}
+ for(const s of shelfItems){const y=272+s.row*118;ctx.fillStyle=s.c;
+  if(s.k<.55){ctx.beginPath();ctx.moveTo(s.x,y);ctx.quadraticCurveTo(s.x-2,y-70,s.x+s.w/2,y-78);ctx.quadraticCurveTo(s.x+s.w+2,y-70,s.x+s.w,y);ctx.fill();ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(s.x+s.w/2-6,y-70);ctx.lineTo(s.x+s.w/2+6,y-62);ctx.stroke()}
+  else if(s.k<.7){ctx.fillStyle='#3a2a1a';ctx.fillRect(s.x,y-60,30,60);ctx.fillStyle='#e8dcc0';ctx.beginPath();ctx.arc(s.x+15,y-38,10,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#2a1a10';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(s.x+15,y-38);ctx.lineTo(s.x+15,y-45);ctx.moveTo(s.x+15,y-38);ctx.lineTo(s.x+20,y-36);ctx.stroke()}
+  else if(s.k<.82){ctx.fillStyle='#2a2826';ctx.beginPath();ctx.moveTo(s.x,y);ctx.lineTo(s.x+6,y-18);ctx.lineTo(s.x+30,y-18);ctx.lineTo(s.x+34,y);ctx.fill()}
+  else{ctx.fillStyle='#1a1410';ctx.fillRect(s.x,y-36,12,36);ctx.fillRect(s.x+14,y-36,12,36)}
+  if(s.tag){ctx.fillStyle='#e8dcc0';ctx.fillRect(s.x+4,y-14,9,6)}}
+ /* window */
+ rimFill(P(p=>p.rect(50,140,340,440)),'#3a2a1c','#7a5a3a',-2,1);
+ ctx.fillStyle=lg(0,150,0,570,['#3a4652','#4e5864','#2e343a']);ctx.fillRect(62,152,316,416);
+ ctx.fillStyle='rgba(30,32,36,.9)';ctx.fillRect(62,380,316,188);
+ ctx.strokeStyle='#2a2a2a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(220,152);ctx.lineTo(220,190);ctx.moveTo(180,190);ctx.lineTo(260,190);ctx.stroke();
+ for(const[x,y]of[[196,212],[244,212],[220,250]]){const g=ctx.createRadialGradient(x-5,y-6,2,x,y,17);g.addColorStop(0,'#fff0b0');g.addColorStop(.4,'#d8a840');g.addColorStop(1,'#6a4a12');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,17,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#2a2a2a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y-17);ctx.lineTo(x,190);ctx.stroke()}
+ ctx.strokeStyle='rgba(200,210,220,.25)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<30;i++){const x=62+(i*67)%316,y=152+((i*131+(reduce?0:t*.3))%416);ctx.moveTo(x,y);ctx.lineTo(x-2,y+14)}ctx.stroke();
+ ctx.save();ctx.translate(220,320);ctx.scale(-1,1);ctx.fillStyle='rgba(220,180,90,.85)';ctx.font='600 22px "IM Fell English",Georgia,serif';ctx.textAlign='center';ctx.fillText('M. HATCH',0,0);ctx.font='italic 14px "IM Fell English",Georgia,serif';ctx.fillText('Pawnbroker · Money Lent',0,22);ctx.restore();
+ ctx.strokeStyle='#5a4a3a';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(220,140);ctx.lineTo(220,580);ctx.moveTo(50,360);ctx.lineTo(390,360);ctx.stroke();
+ /* gas */
+ const fl=reduce?1:.9+.1*Math.sin(t*.017)*Math.sin(t*.011);
+ ctx.strokeStyle='#8a6a3a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(760,-400);ctx.lineTo(760,296);ctx.stroke();ctx.fillStyle=`rgba(255,220,140,${fl})`;ctx.beginPath();ctx.moveTo(748,296);ctx.quadraticCurveTo(760,272,772,296);ctx.quadraticCurveTo(760,302,748,296);ctx.fill();
+ glow(760,300,520,'255,190,110',.32*fl);
+ /* Mrs Hatch */
+ person(800,640,.92,{id:'hatch',coat:'#2a2228',rim:'#c8925a',skirt:'#241c22',shawl:'#4a3040',hat:'widow',specs:1,arms:'front',flip:1,skin:'#c89a7a',skinL:'#f4c08a',hair:'#8a7a6a',ph:.8},t);
+ /* counter */
+ rimFill(P(p=>p.rect(460,566,1800,134)),'#3a2618','#9a6a40',0,3);
+ ctx.fillStyle='#5a3c24';ctx.fillRect(452,558,1820,12);
+ ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=2;for(let x=480;x<2200;x+=140)ctx.strokeRect(x,584,120,100);
+ for(const x of[520,980,1400]){rimFill(P(p=>p.rect(x,320,18,250)),'#3a2618','#9a6a40',-2,0);ctx.fillStyle='#4a3020';ctx.fillRect(x-6,312,30,10)}
+ ctx.fillStyle='#b88a40';ctx.fillRect(1080,530,4,30);ctx.beginPath();ctx.moveTo(1040,530);ctx.lineTo(1124,530);ctx.lineWidth=2;ctx.strokeStyle='#b88a40';ctx.stroke();ctx.beginPath();ctx.ellipse(1046,546,14,4,0,0,Math.PI*2);ctx.ellipse(1118,546,14,4,0,0,Math.PI*2);ctx.stroke();
+ ctx.fillStyle='#e8dcc0';ctx.fillRect(640,552,60,8);
+ ctx.restore();
+ ctx.fillStyle=lg(0,700,0,1000,['#2c2016','#160f0a']);ctx.fillRect(-600,700,2800,800);
+ ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1;for(let x=-1400;x<3000;x+=70){ctx.beginPath();ctx.moveTo(800+(x-800)*.3,700);ctx.lineTo(x,1000);ctx.stroke()}
+ glow(760,760,500,'255,180,100',.08*fl)}
+SC.pawn={title:'Mrs Hatch’s, Pawnbroker',place:'Leather Lane, Holborn',walk:[160,1300],enter:300,pal:'gas',amb:'rain',bg:pawnBg,
+ hs:[
+ {id:'door',name:'Door to Leather Lane',x:50,y:140,w:150,h:560,wx:160,exit:()=>openMap(),dir:'left'},
+ {id:'balls',name:'Three brass balls',x:170,y:180,w:100,h:100,wx:260,verbs:()=>[['Look',()=>say('The three brass balls. Two to one you’ll never get it back, they say.')]]},
+ {id:'hatch',name:'Mrs Hatch',x:740,y:380,w:130,h:180,wx:700,verbs:()=>[['Talk',talkHatch]],use:{watch:pledge,coal:()=>line('Mrs Hatch','I don’t lend on coal, dear. Try the gasworks.'),bticket:redeemTheo,osletter:()=>F('ordered')?say('He has it already.'):askLetter(),forged:()=>say('Not here. That’s for Welsh farmers.'),theodolite:()=>say('Pawn it straight back? Josiah would haunt me.'),notebook:()=>say('Worth nothing to her. Everything to me.')}},
+ {id:'shelf2',name:'Pledges',x:900,y:150,w:600,h:240,wx:1000,verbs:()=>[['Look',()=>say('Sunday suits, flat irons, wedding rings, a fiddle, a birdcage. Half of Holborn lives on that shelf from Monday to Saturday.')]]},
+ {id:'boxes',name:'Private boxes',x:980,y:320,w:440,h:240,wx:1100,verbs:()=>[['Look',()=>say('Little partitioned boxes along the counter, so the neighbours can’t see who’s pawning what. Very discreet. Everybody knows anyway.')]]},
+ {id:'scales',name:'Scales',x:1030,y:510,w:110,h:50,wx:1060,verbs:()=>[['Look',()=>say('For weighing silver. She knows the price of sentiment to a pennyweight.')]]}
+ ]};
+async function talkHatch(){
+ addLedger('hatch');
+ if(F('ordered')&&!has('forged')){await collectLetter();return}
+ await line('Mrs Hatch','Pledging or redeeming, dear?');
+ const o=[];
+ if(has('watch'))o.push(['Pledging. My watch.',pledge]);
+ if(has('bticket'))o.push(['Redeeming. Mr Bevan’s theodolite.',redeemTheo]);
+ if(has('osletter')&&!F('ordered'))o.push(['Neither. I need a letter written.',askLetter]);
+ if(!o.length){await line('Mrs Hatch','Twelve months and seven days, Mr '+(F('smith')?'Smith':'Crane')+'. Then it’s mine to sell.');return}
+ const c=await choose([...o.map(x=>x[0]),'Nothing, yet.']);if(o[c])await o[c][1]()}
+/* the letter of authority: Mrs Hatch's lodger, a law-writer, copies the Colonel's hand onto the blank leaf of the real letter */
+async function askLetter(){
+ await speak('A letter, in this gentleman’s hand. Saying I may go where I like in Glamorgan with a theodolite.');
+ await line('Mrs Hatch','Government paper. Hm.');await sleep(400);
+ await line('Mrs Hatch','I don’t do letters, dear. But Mr Ellis upstairs does. Law-writer. Copies wills for Chancery Lane all day, and whatever’s wanted all night.');
+ addLedger('ellis');
+ await line('Mrs Hatch','He’ll want the real one to work from. The second leaf is blank, see, with the Crown pressed in the corner. He can’t forge the Crown, but he doesn’t have to.');
+ await line('Mrs Hatch','Seven and six. Or I’ll take a ticket off you, if you’ve one worth having.');
+ const o=[];
+ /* cash only if it still leaves the fare and the theodolite paid for */
+ const need=90+(has('rticket')?0:270)+(has('theodolite')?0:126);
+ if(G.money>=need)o.push(['Seven and six.',async()=>{spend(90)}]);
+ if(has('pawnticket'))o.push(['Take the ticket for my father’s watch.',async()=>{drop('pawnticket');flag('watchGone');await line('Mrs Hatch','Your father’s watch, for a colonel’s hand. Well. It didn’t go anyway.');await say('No. It didn’t.')}]);
+ if(!o.length){await line('Mrs Hatch','Seven and six, dear, or something on my shelf to show for it. Come back when you’ve one or the other.');return}
+ const c=await choose([...o.map(x=>x[0]),'Not yet.']);if(!o[c])return;await o[c][1]();
+ await speak('The bearer, Mr E. Crane, Civil Assistant, is authorised to enter upon lands in the County of Glamorgan, for the purposes of the Survey.');
+ await line('Mrs Hatch','I’ll take it up to him. He’s a slow, careful man, Mr Ellis. Come back in an hour.');
+ drop('osletter');flag('ordered');addSecret('forgery')}
+async function collectLetter(){
+ if(!F('forgeReady')){await line('Mrs Hatch','Not yet, dear. He’s still on the capital letters. Come back in an hour.');return}
+ await line('Mrs Hatch','There. Written on the blank leaf and cut off clean. The old half went in his fire, so there’s nothing to come back to you.');give('forged');
+ await say('“H. James, Colonel R.E., Director-General.” Better than the real one. The Crown sits in the corner where Southampton put it.');
+ await say('Any farmer in Wales would open his gate to that.')}
+async function pledge(){
+ addLedger('hatch');
+ await line('Mrs Hatch','Let’s see it, then.');await line('Mrs Hatch','Silver hunter. London hallmark. Doesn’t go.');await line('Mrs Hatch','Thirty-five shillings.');
+ const c=await choose(['Done.','A London hallmark, as you say. Fifty.']);
+ let d=420;if(c===1){await line('Mrs Hatch','Fifty! Forty-five, and you’re robbing a widow.');d=540}
+ await line('Mrs Hatch','Name?');
+ const n=await choose(['Elias Crane.','John Smith.']);
+ if(n===0)await line('Mrs Hatch','An honest one. We don’t get many.');else{flag('smith');await line('Mrs Hatch','Another Mr Smith. Grand family, the Smiths. Half of Holborn.')}
+ drop('watch');earn(d);give('pawnticket');flag('pawned');
+ await line('Mrs Hatch',`${lsd(d)}, and your ticket. Twelve months and seven days to redeem.`);
+ await say('Twenty past four, Father. You’d want it to buy something useful.')}
+
+async function redeemTheo(){
+ addLedger('hatch');
+ await line('Mrs Hatch','Bevan. The surveyor. Brought it in May, wrapped in his coat against the rain. Said he’d be back for it when his ship came in.');
+ await speak('He died on Tuesday.');
+ await line('Mrs Hatch','Did he. I’m sorry for it. He was a gentleman about the interest.');
+ await line('Mrs Hatch','Still, the ticket’s the ticket, dear. Whoever holds it redeems it. Ten shillings, and sixpence interest.');
+ if(G.money<126){await say('Ten and six. I have '+lsd(G.money)+'.');await say(has('watch')?'There’s Father’s watch. It doesn’t go, but Mrs Hatch doesn’t mind that.':'I need more money than I have.');return}
+ spend(126);drop('bticket');give('theodolite');flag('redeemed');addSecret('ticket');
+ await line('Mrs Hatch','Mind the legs on the door.');
+ await say('Mahogany, with J.B. cut in the lid. Someone has kept the brass oiled. He was always going to come back for it.')}
+
+/* ---------- PADDINGTON ---------- */
+const steam=[];function spawnSteam(x,y,big){steam.push({x:x+(Math.random()-.5)*10,y,r:big?18:10,a:big?.5:.35,vx:(Math.random()-.5)*.3+(big?.15:0),vy:-(.4+Math.random()*.4),g:.25+Math.random()*.2})}
+let trainX=0;
+function paddingtonBg(t,dt){
+ const o=off(.2);ctx.save();ctx.translate(o.x,o.y);
+ ctx.fillStyle=lg(0,-300,0,700,['#0e131c','#1a2230','#2a2a2c']);ctx.fillRect(-600,-400,2800,1100);
+ ctx.strokeStyle='rgba(40,48,60,.9)';ctx.lineWidth=2;for(let x=-600;x<2200;x+=46){ctx.beginPath();ctx.moveTo(x,-300);ctx.lineTo(x+((x-800)*.08),300);ctx.stroke()}
+ for(let i=0;i<7;i++){const y=-20+i*52,lw=16-i*1.8;ctx.strokeStyle='#26282c';ctx.lineWidth=lw;ctx.beginPath();ctx.moveTo(-600,y+120);ctx.quadraticCurveTo(800,y-80,2200,y+120);ctx.stroke();ctx.strokeStyle='rgba(220,160,90,.22)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-600,y+120+lw/2);ctx.quadraticCurveTo(800,y-80+lw/2,2200,y+120+lw/2);ctx.stroke()}
+ /* far side arcade */
+ ctx.fillStyle='#2a2420';ctx.fillRect(-600,330,2800,170);
+ for(let x=-560;x<2200;x+=200){ctx.fillStyle='#3a3530';ctx.fillRect(x,300,14,240);ctx.strokeStyle='#3a3530';ctx.lineWidth=6;ctx.beginPath();ctx.arc(x+107,330,93,Math.PI,0);ctx.stroke();ctx.strokeStyle='rgba(58,53,48,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+107,330,70,Math.PI,0);ctx.stroke();glow(x+107,420,90,'255,190,110',.12)}
+ /* clock */
+ ctx.strokeStyle='#3a3530';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(700,-400);ctx.lineTo(700,150);ctx.stroke();
+ rimFill(P(p=>p.arc(700,196,44,0,Math.PI*2)),'#2a2420','#c8925a',-2,1);ctx.fillStyle='#efe6cf';ctx.beginPath();ctx.arc(700,196,36,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#1a1410';ctx.lineWidth=1.5;for(let i=0;i<12;i++){const a=i/12*Math.PI*2;ctx.beginPath();ctx.moveTo(700+Math.cos(a)*30,196+Math.sin(a)*30);ctx.lineTo(700+Math.cos(a)*34,196+Math.sin(a)*34);ctx.stroke()}
+ const mins=50+(F('boarded')?8:0);ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(700,196);ctx.lineTo(700+Math.cos((8+mins/60)/12*Math.PI*2-Math.PI/2)*18,196+Math.sin((8+mins/60)/12*Math.PI*2-Math.PI/2)*18);ctx.stroke();ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(700,196);ctx.lineTo(700+Math.cos(mins/60*Math.PI*2-Math.PI/2)*28,196+Math.sin(mins/60*Math.PI*2-Math.PI/2)*28);ctx.stroke();
+ glow(700,196,90,'255,220,160',.25);
+ /* train */
+ if(F('boarded')&&!reduce)trainX+=Math.min(6,(trainX*.012+.15))*dt*.06;
+ ctx.save();ctx.translate(trainX-170,0);
+ for(let c=0;c<3;c++){const x0=640+c*226;rimFill(P(p=>p.rect(x0,470,216,176)),'#4a2818','#c8925a',0,2);ctx.fillStyle='#d8c8a0';ctx.fillRect(x0,476,216,74);
+  for(let k=0;k<4;k++){const wx=x0+14+k*52;ctx.fillStyle='#3a2416';ctx.fillRect(wx,490,36,48);ctx.fillStyle='rgba(255,210,140,.75)';ctx.fillRect(wx+3,493,30,42);ctx.strokeStyle='#3a2416';ctx.lineWidth=2;ctx.strokeRect(wx-2,556,40,80)}
+  ctx.fillStyle='#2a1810';ctx.fillRect(x0,460,216,12);ctx.fillStyle='#c9a24a';ctx.font='10px "IM Fell English",Georgia,serif';ctx.textAlign='center';ctx.fillText(c===1?'SECOND':c===0?'FIRST':'LUGGAGE',x0+108,600)}
+ /* the engine, facing the way the train leaves (right): a broad-gauge single with its tender behind,
+    tall chimney at the front, one huge driving wheel under a brass-edged splasher, and an open footplate */
+ const GR='#2e5a34',GD='#1d3a22',BR='#c9a24a',BK='#16130f',spin=trainX*.02;
+ const wheel=(cx,cy,r,n)=>{ctx.fillStyle=BK;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.fillStyle=GR;ctx.beginPath();ctx.arc(cx,cy,r-6,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=BK;ctx.lineWidth=Math.max(2,r*.05);for(let k=0;k<n;k++){const a=spin*(96/r)+k/n*Math.PI*2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*(r-5),cy+Math.sin(a)*(r-5));ctx.stroke()}
+  ctx.fillStyle=BK;ctx.beginPath();ctx.arc(cx,cy,r*.2,0,Math.PI*2);ctx.fill();ctx.fillStyle=BR;ctx.beginPath();ctx.arc(cx,cy,r*.1,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(255,230,170,.18)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,r-2,Math.PI*1.1,Math.PI*1.6);ctx.stroke()};
+ /* carriage underframes and wheels: three axles a carriage, sitting on the rails just above the platform edge */
+ for(let c=0;c<3;c++){const x0=640+c*226;ctx.fillStyle=BK;ctx.fillRect(x0+6,646,204,10);ctx.fillRect(x0-6,648,12,6);
+  for(const dx of[34,108,182]){ctx.fillStyle='#3a342c';ctx.fillRect(x0+dx-14,652,28,6);wheel(x0+dx,668,20,8)}}
+ /* tender, coupled to the luggage van */
+ const T=1318;ctx.fillStyle=BK;ctx.fillRect(T-8,640,16,8);
+ rimFill(P(p=>p.rect(T,566,108,96)),GD,GR,0,2);ctx.strokeStyle=BR;ctx.lineWidth=1.5;ctx.strokeRect(T+8,576,92,76);
+ ctx.fillStyle=BK;ctx.beginPath();ctx.moveTo(T+4,566);for(let k=0;k<=10;k++)ctx.lineTo(T+4+k*10,556-((k*37)%9));ctx.lineTo(T+104,566);ctx.closePath();ctx.fill();
+ ctx.fillStyle=BK;ctx.fillRect(T,660,108,10);wheel(T+28,668,20,8);wheel(T+80,668,20,8);
+ /* footplate and frames */
+ const E=1434;ctx.fillStyle=BK;ctx.fillRect(E,636,286,12);ctx.fillRect(E+14,648,250,18);ctx.fillStyle=BR;ctx.fillRect(E,636,286,2);
+ /* open footplate: just a weatherboard with two round spectacle windows, and a handrail */
+ rimFill(P(p=>p.rect(E+4,500,14,136)),GD,GR,0,1);ctx.fillStyle='rgba(255,220,150,.7)';for(const y of[526,552]){ctx.beginPath();ctx.arc(E+11,y,4.5,0,Math.PI*2);ctx.fill()}ctx.strokeStyle=BR;ctx.lineWidth=1.5;ctx.strokeRect(E+4,500,14,136);
+ /* raised firebox with its brass safety-valve bonnet */
+ rimFill(P(p=>{p.rect(E+20,532,52,104);p.ellipse(E+46,532,26,10,0,Math.PI,0)}),GD,GR,0,2);
+ ctx.fillStyle=BR;ctx.beginPath();ctx.moveTo(E+36,522);ctx.quadraticCurveTo(E+46,490,E+56,522);ctx.closePath();ctx.fill();ctx.fillRect(E+33,520,26,5);ctx.fillStyle='rgba(255,250,220,.55)';ctx.fillRect(E+42,503,3,16);
+ /* boiler: green, with brass bands */
+ rimFill(P(p=>p.rect(E+72,540,186,64)),GD,GR,0,3);for(let x=E+96;x<E+250;x+=40){ctx.fillStyle=BR;ctx.fillRect(x,540,3,64)}
+ ctx.fillStyle='rgba(255,255,255,.10)';ctx.fillRect(E+72,546,186,8);ctx.fillStyle=BK;ctx.fillRect(E+72,604,186,32);
+ /* brass dome */
+ ctx.fillStyle=BR;ctx.beginPath();ctx.moveTo(E+108,541);ctx.quadraticCurveTo(E+110,512,E+122,512);ctx.quadraticCurveTo(E+134,512,E+136,541);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(255,250,220,.5)';ctx.fillRect(E+115,518,3,20);
+ /* smokebox, its round door, and the tall chimney with a copper cap */
+ rimFill(P(p=>p.rect(E+258,536,30,100)),BK,'#4a4640',0,2);ctx.strokeStyle='#4a4640';ctx.lineWidth=2;ctx.beginPath();ctx.arc(E+284,572,26,-Math.PI/2,Math.PI/2);ctx.stroke();
+ rimFill(P(p=>{p.moveTo(E+262,536);p.lineTo(E+266,480);p.lineTo(E+282,480);p.lineTo(E+286,536);p.closePath()}),BK,'#4a4640',-1,0);
+ ctx.fillStyle='#b87333';ctx.fillRect(E+259,468,30,14);ctx.fillStyle='rgba(255,220,170,.45)';ctx.fillRect(E+261,470,26,3);
+ /* cylinder and buffer beam */
+ rimFill(P(p=>p.rect(E+238,640,52,26)),BK,'#4a4640',0,1);
+ ctx.fillStyle='#8a2a20';ctx.fillRect(E+284,628,12,36);ctx.fillStyle=BK;for(const y of[636,656]){ctx.fillRect(E+296,y-3,10,6);ctx.beginPath();ctx.ellipse(E+308,y,3,7,0,0,Math.PI*2);ctx.fill()}
+ /* wheels: one great driving wheel, small leading wheels, a trailing wheel under the firebox */
+ const DX=E+168,DY=622,DR=66;
+ rimFill(P(p=>{p.arc(DX,DY,DR+7,Math.PI,0);p.lineTo(DX+DR+7,DY);p.lineTo(DX-DR-7,DY);p.closePath()}),GD,GR,0,2);
+ wheel(DX,DY,DR,18);wheel(E+240,668,20,8);wheel(E+278,668,20,8);wheel(E+46,666,22,10);
+ ctx.strokeStyle=BR;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(DX,DY,DR+7,Math.PI,0);ctx.stroke();
+ /* the connecting rod, from the crank pin on the driving wheel to the crosshead by the cylinder */
+ {const a=spin+.6,px=DX+Math.cos(a)*28,py=DY+Math.sin(a)*28;ctx.strokeStyle='#8a8680';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(E+238,653);ctx.stroke();ctx.lineCap='butt';ctx.fillStyle=BR;ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fill()}
+ if(!reduce&&Math.random()<(F('boarded')?.6:.18))spawnSteam(E+274-170,466,F('boarded'));
+ if(!reduce&&Math.random()<.05)spawnSteam(E+290-170,660,false);
+ ctx.restore();
+ for(let i=steam.length-1;i>=0;i--){const s=steam[i];s.x+=s.vx;s.y+=s.vy;s.r+=s.g;s.a*=.993;if(s.y<-60)s.vy*=.5;if(s.a<.02){steam.splice(i,1);continue}
+  ctx.fillStyle=`rgba(200,190,176,${s.a*.5})`;ctx.beginPath();ctx.arc(s.x+(F('boarded')?trainX*.6:0),s.y,s.r,0,Math.PI*2);ctx.fill()}
+ /* station building at left */
+ rimFill(P(p=>p.rect(-600,260,1180,440)),'#3a3028','#8a6a48',-2,0);
+ const BW=[[70,'BOOKING OFFICE'],[260,'PARCELS']];
+ for(const[x,lbl]of BW){ctx.fillStyle='#1a1410';ctx.fillRect(x-6,456,150,244);ctx.fillStyle='rgba(255,200,130,.8)';ctx.fillRect(x+6,470,126,126);
+  ctx.fillStyle='#2a1a10';ctx.fillRect(x-14,420,166,28);ctx.fillStyle='#e8d8b0';ctx.font='600 12px "IM Fell English",Georgia,serif';ctx.textAlign='center';ctx.fillText(lbl,x+69,439)}
+ person(139,664,.72,{id:'booking',coat:'#1e1c1a',rim:'#e0a060',hat:null,hair:'#3a2a1c',whiskers:'#3a2a1c',arms:'front',flip:1,shadow:false},t);
+ person(329,664,.72,{id:'parcels',coat:'#26221e',rim:'#e0a060',hat:'cap',hatC:'#1a1a22',arms:'front',flip:1,shadow:false,ph:1},t);
+ for(const[x]of BW){ctx.strokeStyle='#2a1a10';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+69,470);ctx.lineTo(x+69,560);ctx.moveTo(x+6,520);ctx.lineTo(x+132,520);ctx.stroke();
+  ctx.fillStyle='#1a1410';ctx.fillRect(x+6,560,126,36);ctx.fillStyle='#2a1a10';ctx.fillRect(x+44,572,50,24);
+  rimFill(P(p=>p.rect(x-16,596,170,12)),'#4a3626','#a07a50',0,-1);
+  rimFill(P(p=>p.rect(x-6,608,150,92)),'#2e231a','#6a4e34',-2,0);
+  ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=1.5;ctx.strokeRect(x+6,620,58,68);ctx.strokeRect(x+74,620,58,68)}
+ ctx.fillStyle='#ece0c0';ctx.fillRect(-220,300,180,230);ctx.fillStyle='#2a1a10';ctx.font='600 13px "IM Fell English",Georgia,serif';ctx.textAlign='center';ctx.fillText('GREAT WESTERN RAILWAY',-130,326);ctx.font='11px "IM Fell English",Georgia,serif';['DOWN TRAINS','Reading · Swindon','Gloucester · Newport','CARDIFF · Swansea','Night Mail 9.0 p.m.'].forEach((s,i)=>ctx.fillText(s,-130,354+i*22));
+ for(const x of[60,400,560]){glow(x,300,140,'255,200,120',.25)}
+ /* bookstall */
+ rimFill(P(p=>p.rect(420,470,150,230)),'#3a2a1c','#c8925a',-2,0);
+ ctx.fillStyle='#2a6a3a';ctx.fillRect(412,440,166,30);ctx.fillStyle='#ece0c0';ctx.font='600 11px "IM Fell English",Georgia,serif';ctx.fillText('W. H. SMITH & SON',495,460);
+ const r=rng(4);for(let i=0;i<8;i++){ctx.fillStyle=['#e8e0cc','#d8ccb0','#c8b890'][i%3];ctx.fillRect(428+(i%4)*35,486+Math.floor(i/4)*44,30,38);ctx.fillStyle='rgba(30,20,10,.5)';ctx.fillRect(431+(i%4)*35,490+Math.floor(i/4)*44,24,3);ctx.fillRect(431+(i%4)*35,496+Math.floor(i/4)*44,16+r()*8,2)}
+ glow(495,520,130,'255,200,120',.2);
+ /* lamp standards */
+ for(const x of[620,1200]){ctx.fillStyle='#1c1a18';ctx.fillRect(x-3,560,6,140);ctx.fillStyle='rgba(255,220,150,.95)';ctx.fillRect(x-8,540,16,20);glow(x,550,200,'255,190,110',.3)}
+ /* guard */
+ if(!F('boarded')||trainX<40)person(1040,724,.78,{id:'guard',coat:'#1c2232',rim:'#e0a060',hat:'cap',hatC:'#14182a',whiskers:'#6a5a4a',chain:1,flip:1,ph:.7},t);
+ ctx.restore();
+ ctx.fillStyle=lg(0,690,0,1000,['#3c352c','#1e1914']);ctx.fillRect(-600,690,2800,800);
+ ctx.fillStyle='#d8cbb0';ctx.globalAlpha=.25;ctx.fillRect(-600,688,2800,5);ctx.globalAlpha=1;
+ ctx.strokeStyle='rgba(0,0,0,.25)';ctx.lineWidth=1;for(let x=-1400;x<3000;x+=90){ctx.beginPath();ctx.moveTo(800+(x-800)*.3,692);ctx.lineTo(x,1000);ctx.stroke()}
+ for(const x of[620,1200,60,400])glow(x,800,230,'255,180,100',.07)}
+SC.paddington={title:'The down mail',place:'Paddington station · 8.50 p.m.',walk:[160,1180],enter:180,pal:'gas',amb:'steam',bg:paddingtonBg,
+ hs:[
+ {id:'exit',name:'Way out to Praed Street',x:0,y:600,w:56,h:100,wx:170,exit:()=>openMap(),dir:'left'},
+ {id:'booking',name:'Booking office',x:60,y:420,w:160,h:280,wx:200,verbs:()=>[['Buy a ticket',buyTicket]],use:{forged:()=>line('Booking clerk','Very grand, sir. It’s still one pound two and six.'),pawnticket:()=>line('Booking clerk','We take money, sir, not promises.')}},
+ {id:'parcels',name:'Parcels office',x:250,y:420,w:160,h:280,wx:330,verbs:()=>[['Talk',()=>line('Parcels clerk',has('box')?'Something to send, sir?':F('sent')?'It’s on the nine o’clock, sir, same as you.':'Parcels for the West of England and South Wales, sir.')]],use:{box:sendBox,notebook:()=>say('No. That travels with me.')}},
+ {id:'books',name:'W. H. Smith bookstall',x:412,y:440,w:166,h:260,wx:480,verbs:()=>[['Look',()=>say('Railway novels at a shilling, the evening papers, and Punch. The boy has fallen asleep on the Telegraph.')],['Read the papers',readPapers]]},
+ {id:'clock',name:'Station clock',x:650,y:146,w:100,h:100,wx:700,verbs:()=>[['Look',()=>say(F('boarded')?'':'Ten minutes to nine. Railway time, which is London time, which the guard says is the only time that matters.')]]},
+ {id:'engine',name:'Locomotive',x:1150,y:440,w:420,h:270,wx:1160,verbs:()=>[['Look',()=>say('Broad gauge. Seven feet between the rails, the way Brunel wanted it, and an eight-foot driving wheel. They say she does sixty on the level past Didcot.')]]},
+ {id:'guard',name:'Guard',x:990,y:500,w:100,h:230,wx:960,verbs:()=>[['Talk',talkGuard],['Board the train',board]]},
+ {id:'carriage',name:'Second-class carriage',x:696,y:470,w:216,h:210,wx:960,verbs:()=>[['Board',board]]}
+ ]};
+async function buyTicket(){
+ if(has('rticket')){await line('Booking clerk','You’ve your ticket, sir. Platform one, the nine o’clock.');return}
+ await line('Booking clerk','Where to, sir?');await speak('Cardiff.');await line('Booking clerk','The night mail goes round by Gloucester, sir. No bridge over the Severn. Six hours, near enough.');
+ await line('Booking clerk','Night mail, nine o’clock. First class one pound thirteen; second, one pound two and six. Third is the Parliamentary, a penny a mile, half past six tomorrow morning.');
+ if(G.money<270){await say('One pound two and six. I have '+lsd(G.money)+'.');await say('And by tomorrow, Grice will be looking for the Colonel’s letter.');await say('I need money tonight. There’s Mrs Hatch, in Leather Lane.');return}
+ const c=await choose(['Second class, single.','First class.']);
+ if(c===1){await speak('And arrive a gentleman with nothing left? Second, please.')}
+ spend(270);give('rticket');await line('Booking clerk','Second single, Cardiff. Change at Cardiff for the Taff Vale.')}
+async function sendBox(){
+ await line('Parcels clerk','Where to, sir?');await speak('Mrs Gwen Rees, Pen-y-graig, Cwm Du. Taff Vale Railway, Pontypridd station, to be collected.');
+ await line('Parcels clerk','Contents?');await speak('Personal effects. A dead man’s spectacles and his last letter.');
+ await line('Parcels clerk','Carriage paid, or carriage forward?');
+ const opts=G.money>=20?['Paid. One and eightpence.','Forward. She can pay at the other end.']:['Forward. She can pay at the other end.'];
+ const c=await choose(opts);
+ if(opts.length===2&&c===0){spend(20);await line('Parcels clerk','Very decent of you, sir.')}else await line('Parcels clerk','Forward it is.');
+ drop('box');flag('sent');await line('Parcels clerk','It’ll go down on the nine o’clock, sir. Same as you, if you’re quick.')}
+async function readPapers(){
+ await say('The Times. The Suez Canal opens in November, and the French are delighted with themselves.');
+ await say('The Debtors Act: from New Year, no more prison for debt. A man can owe what he likes.');
+ await say('And a notice. “The Lords of the Admiralty invite tenders for the supply of Welsh steam coal.”');
+ if(!F('valued'))await say('Welsh steam coal. Someone at the Exchange will know what that’s worth.')}
+async function talkGuard(){await line('Guard','Down mail for Reading, Swindon, Gloucester and South Wales! Change at Cardiff for the Taff Vale!');if(!has('rticket'))await line('Guard','Ticket first, sir. Booking office is behind you.')}
+async function board(){
+ const miss=[];
+ if(!F('rubbed'))miss.push('I don’t even know where in Wales I’m going. Whatever Bevan found, it was on those torn pages.');
+ else if(!F('valued'))miss.push('And I don’t know what his coal is worth. Somebody on the Coal Exchange would know at a glance.');
+ if(F('rubbed')&&!has('forged'))miss.push('A stranger on a Welsh hillside with a theodolite gets asked questions. I need an answer on paper.');
+ if(F('rubbed')&&!has('theodolite'))miss.push(has('bticket')?'I’ve nothing to survey with. Bevan’s theodolite is still on Mrs Hatch’s shelf, and his ticket is in my pocket.':'I’ve nothing to survey with.');
+ if(!F('sent'))miss.push(has('box')?'Bevan’s box is still under my arm.':'And Bevan’s things are still on his desk, waiting to be boxed.');
+ if(!F('delivered'))miss.push('Hallam’s letter to Dobbs is still in my pocket. Hallam would have the police after me by Thursday.');
+ if(!has('rticket'))miss.push('And I haven’t a ticket.');
+ if(miss.length){await line('Guard','Board if you’re boarding, sir.');for(const m of miss.slice(0,3))await say(m);return}
+ await line('Guard','Ticket, sir? Second class, Cardiff. In you get.');
+ await say('Gwen Rees. Pen-y-graig. Cae’r Glo.');await say('Six feet of steam coal, and nobody alive knows it but me.');
+ crane.hidden=true;flag('boarded');audio.whistle();
+ await sleep(3800);await finale()}
+
+/* ================= map & travel ================= */
+const ov=document.getElementById('ov'),fadeEl=document.getElementById('fade'),fadeP=document.getElementById('fadeP');
+const PLACES=[
+ {id:'paddington',name:'Paddington station',sub:'Great Western Railway',x:12,y:14,how:'By the Underground Railway: steam, sulphur and gaslight, all the way to Paddington.'},
+ {id:'pawn',name:'Mrs Hatch’s',sub:'Leather Lane, Holborn',x:53,y:30,how:'Up Chancery Lane in the rain to Leather Lane.'},
+ {id:'office',name:'Hallam & Pike',sub:'Great George Street',x:40,y:70,how:'Back to Westminster, past the new Embankment works.'},
+ {id:'exchange',name:'The Coal Exchange',sub:'Lower Thames Street',x:78,y:58,how:'East along the river by omnibus, past St Paul’s.'}];
+function openMap(){
+ closePanel();setSel(null);
+ ov.innerHTML=`<div class="map"><h2>Where to?</h2><div class="mapbox"><svg viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">
+  <rect width="160" height="90" fill="#1b130d"/>
+  <path d="M0 74 C 20 70 34 84 50 78 C 62 74 60 60 70 58 C 86 55 96 66 112 64 C 128 62 140 70 160 66" stroke="#5a6a72" stroke-width="5" fill="none" opacity=".75"/>
+  <path d="M14 28 h30 v20 h-30z" fill="#2c3a24" opacity=".7"/>
+  <g stroke="rgba(233,184,106,.12)" stroke-width=".4" fill="none"><path d="M0 30 H160 M0 50 H160 M40 0 V90 M80 0 V90 M120 0 V90"/><path d="M19 13 L86 30 L124 52"/><path d="M64 70 L86 30"/></g>
+  <text x="29" y="39" fill="rgba(243,227,196,.35)" font-size="3" font-family="IM Fell English, Georgia, serif" text-anchor="middle">Hyde Park</text>
+  <text x="104" y="76" fill="rgba(243,227,196,.35)" font-size="3.2" font-family="IM Fell English, Georgia, serif" font-style="italic">River Thames</text>
+ </svg>${PLACES.map(p=>`<button class="pin${p.id===G.scene?' here':''}" style="left:${p.x}%;top:${p.y}%" data-p="${p.id}"><i></i><span>${p.name}</span><em>${p.id===G.scene?'You are here':p.sub}</em></button>`).join('')}</div>
+ <div style="text-align:center"><button class="btn" id="stay">Stay here</button></div></div>`;
+ ov.classList.add('on');
+ ov.querySelectorAll('.pin').forEach(b=>b.onclick=()=>{const p=PLACES.find(q=>q.id===b.dataset.p);ov.classList.remove('on');if(p.id!==G.scene)travel(p.id,p.how)});
+ document.getElementById('stay').onclick=()=>ov.classList.remove('on')}
+async function travel(id,how){
+ setBusy(true);fadeP.textContent=how||'';fadeEl.classList.add('on');await sleep(reduce?200:1900);
+ if(F('ordered')&&id!=='pawn')flag('forgeReady');G.scene=id;save();enterScene(id);fadeEl.classList.remove('on');await sleep(400);setBusy(false);
+ const s=SC[id];if(!G.seen['v_'+id]){G.seen['v_'+id]=true;save();run(async()=>{if(id==='exchange')await say('The Coal Exchange. Every ton that comes up the Thames is bought and sold under this dome.');if(id==='pawn')await say('“Uncle’s”, we called it as boys. I pawned my good boots here, the winter Father died.');if(id==='paddington')await say('Paddington. Brunel’s cathedral, and the night mail for South Wales.')})}}
+function enterScene(id){scene=SC[id];G.scene=id;crane.x=crane.tx=scene.enter;crane.dir=1;crane.walking=false;crane.hidden=false;
+ document.getElementById('chH').textContent=scene.title;document.getElementById('chP').textContent=scene.place;
+ buildHotspots();audio.scene(scene.amb);centerPan(true)}
+
+/* ================= hotspots DOM ================= */
+let hsEls=[];
+function buildHotspots(){
+ hsEls.forEach(({el,lb,ex})=>{el.remove();lb.remove();if(ex)ex.remove()});hsEls=[];
+ for(const h of scene.hs){const el=document.createElement('div');el.className='hs';const lb=document.createElement('div');lb.className='label';
+  el.onpointerenter=e=>{if(e.pointerType!=='mouse'||busy)return;showLabel(h,lb,false);cur.classList.add('hot')};
+  el.onpointerleave=e=>{if(e.pointerType!=='mouse')return;cur.classList.remove('hot');if(!lb.classList.contains('open'))lb.classList.remove('on')};
+  el.onclick=e=>{e.stopPropagation();if(busy)return;
+   if(sel){const it=sel;setSel(null);clearLabels();run(async()=>{await walkTo(h.wx);await useOn(it,h)});return}
+   const was=lb.classList.contains('open');clearLabels();if(!was)showLabel(h,lb,true)};
+  hud.append(el,lb);
+  if(h.exit){const nm=()=>typeof h.name==='function'?h.name():h.name;const ex=document.createElement('button');ex.className='exit '+(h.dir||'left');ex.setAttribute('aria-label',nm());ex.innerHTML='<svg viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg>';
+   ex.onpointerenter=e=>{if(e.pointerType!=='mouse')return;cur.classList.add('hot');if(busy)return;lb.innerHTML=`<div class="name">${nm()}</div>`;lb.classList.add('on')};
+   ex.onpointerleave=()=>{cur.classList.remove('hot');lb.classList.remove('on')};
+   ex.onclick=e=>{e.stopPropagation();lb.classList.remove('on');if(busy){hurry();return}if(sel)setSel(null);clearLabels();closePanel();run(async()=>{await walkTo(h.wx);await h.exit()})};
+   ex.ondblclick=e=>{e.stopPropagation();hurry()};
+   hud.append(ex);hsEls.push({h,el,lb,ex})}else hsEls.push({h,el,lb})}}
+function hurry(){if(crane.walking){crane.x=crane.tx;crane.walking=false;const r=crane.res;crane.res=null;r&&r()}}
+function showLabel(h,lb,open){
+ const name=typeof h.name==='function'?h.name():h.name;const vs=(h.verbs?h.verbs():[]).filter(Boolean);
+ lb.innerHTML=`<div class="name">${sel?`Use ${ITEMS[sel].name} with ${name}`:name}</div><div class="verbs">${vs.map((v,i)=>`<button data-i="${i}">${v[0]}</button>`).join('')}</div>`;
+ lb.querySelectorAll('button').forEach(b=>{b.onclick=e=>{e.stopPropagation();const v=vs[+b.dataset.i];clearLabels();cur.classList.remove('hot');run(async()=>{if(v[0]!=='Leave')await walkTo(h.wx);if(await blocked(h))return;await v[1]()})};b.onpointerenter=()=>cur.classList.add('hot');b.onpointerleave=()=>cur.classList.remove('hot')});
+ lb.classList.add('on');if(open)lb.classList.add('open')}
+function clearLabels(){for(const{lb}of hsEls)lb.classList.remove('on','open')}
+async function blocked(h){if(h.needs&&!F(h.needs)){await line('The beadle','Oi! Members and their clerks only, sir. Back this side, if you please.');return true}return false}
+async function useOn(it,h){const name=typeof h.name==='function'?h.name():h.name;if(await blocked(h))return;
+ if(h.use&&h.use[it]){await h.use[it]();return}
+ const generic=['That won’t help.','No. What would be the point?','I can’t see that doing any good.','Not with that.'];
+ await say(generic[(it.length+name.length)%generic.length])}
+async function combine(a,b){
+ const k=[a,b].sort().join('+');
+ const C={
+  'graphite+notebook':rubbing,
+  'coal+graphite':()=>say('Graphite and coal. Both carbon, Bevan would say. Only one of them is worth a fortune.'),
+  'bletter+notebook':()=>say('The letter is to Gwen. The notebook was never meant for anybody.')};
+ if(C[k]){await C[k]();return}
+ await say('Those don’t go together.')}
+
+/* ================= rubbing ================= */
+function rubbing(){return new Promise(res=>{
+ if(F('rubbed')){say('“Cae’r Glo, below Pen-y-graig. Seam six feet. Tell no one.” I know it by heart already.').then(res);return}
+ ov.innerHTML=`<div class="rub"><p>Rub the soft graphite across the page below the torn ones. Drag to rub.</p><canvas id="rubc" width="1040" height="700"></canvas><div class="btnrow" style="justify-content:center"><button class="btn" id="rubAll">Rub the whole page</button><button class="btn" id="rubDone" hidden>Read it</button></div></div>`;
+ ov.classList.add('on');
+ const c=document.getElementById('rubc'),x=c.getContext('2d');
+ const mask=document.createElement('canvas');mask.width=1040;mask.height=700;const m=mask.getContext('2d');
+ m.fillStyle='#000';m.font='italic 40px "IM Fell English",Georgia,serif';
+ const L=['Cwm Du. Aug. 1851.','Cae’r Glo — below Pen-y-graig, by the sheep-wash.','Outcrop in the stream bank. Trial pit','under the old oak: seam 6 ft, or better.','STEAM coal. Burns clean. Dips east.','Tell no one.   — J. B.'];
+ L.forEach((s,i)=>m.fillText(s,90,170+i*82));
+ const rub=document.createElement('canvas');rub.width=1040;rub.height=700;const r=rub.getContext('2d');
+ const paper=()=>{const g=x.createLinearGradient(0,0,0,700);g.addColorStop(0,'#efe5cc');g.addColorStop(1,'#e2d4b2');x.fillStyle=g;x.fillRect(0,0,1040,700);
+  x.strokeStyle='rgba(120,140,170,.35)';x.lineWidth=2;for(let y=150;y<680;y+=82){x.beginPath();x.moveTo(60,y+14);x.lineTo(990,y+14);x.stroke()}
+  x.strokeStyle='rgba(170,80,70,.4)';x.beginPath();x.moveTo(70,0);x.lineTo(70,700);x.stroke();
+  x.fillStyle='#e6d8b6';x.beginPath();x.moveTo(0,0);for(let k=0;k<=26;k++)x.lineTo(k*40,18+(k%2)*14);x.lineTo(1040,0);x.fill()};
+ const cells=new Set();let total=0;for(let i=0;i<L.length;i++)total+=Math.ceil(m.measureText(L[i]).width/40);
+ const draw=()=>{paper();x.drawImage(rub,0,0)};
+ const stroke=(px,py)=>{r.save();r.globalCompositeOperation='source-over';for(let k=0;k<14;k++){const a=Math.random()*Math.PI*2,d=Math.random()*34;r.strokeStyle=`rgba(${40+Math.random()*20|0},${40+Math.random()*20|0},${46+Math.random()*20|0},${.06+Math.random()*.07})`;r.lineWidth=2+Math.random()*4;r.beginPath();r.moveTo(px+Math.cos(a)*d-14,py+Math.sin(a)*d*.5+6);r.lineTo(px+Math.cos(a)*d+14,py+Math.sin(a)*d*.5-6);r.stroke()}
+  r.globalCompositeOperation='destination-out';r.drawImage(mask,0,0);r.restore();
+  for(let i=0;i<L.length;i++){const ly=170+i*82;if(Math.abs(py-ly+12)<44){const w=m.measureText(L[i]).width;if(px>60&&px<90+w+20)cells.add(i+':'+Math.floor((px-90)/40))}}
+  draw();if(cells.size>total*.55)done.hidden=false};
+ const pos=e=>{const b=c.getBoundingClientRect();return[(e.clientX-b.left)/b.width*1040,(e.clientY-b.top)/b.height*700]};
+ let down=false;c.onpointerdown=e=>{down=true;c.setPointerCapture(e.pointerId);stroke(...pos(e))};c.onpointermove=e=>{if(down)stroke(...pos(e))};c.onpointerup=()=>down=false;
+ const done=document.getElementById('rubDone');
+ document.getElementById('rubAll').onclick=()=>{for(let y=130;y<640;y+=22)for(let px=40;px<1000;px+=26)stroke(px,y)};
+ done.onclick=async()=>{ov.classList.remove('on');flag('rubbed');addSecret('seam');
+  await say('Cae’r Glo. Below Pen-y-graig. Pen-y-graig: the farm on his letter. His own land.');
+  await say('Six feet of steam coal, and he told no one. Not the firm. Not even his daughter.');
+  await say('Thirty years drawing other men’s mines, Josiah, and you were sitting on one.');
+  await say('A seam is worth nothing to a draughtsman. It’s worth a fortune to whoever owns the land above it. Fenwick, in Bristol, lends money to men with schemes, if they can prove them.');
+  await say('Proving it means measuring on other men’s land. Nobody stops a government surveyor, though. The Ordnance Survey walks every field in Wales, and nobody asks why.');
+  await say('And the Survey wrote to this firm in ’67, about boundary sheets. I drew the reply. That letter is in Grice’s pigeonholes, with the Colonel’s signature on it.');
+  if(has('bticket'))await say('Bevan’s own theodolite is on Mrs Hatch’s shelf. And his ticket is in my pocket.');
+  await say('And it has to be tonight. Every coal company in London is buying up Welsh valleys this year. One of them could walk across Cae’r Glo any day.');
+  await say('The night mail leaves Paddington at nine. Before then I need four things: what this coal is worth, a reason to be on other men’s land, an instrument to survey with, and the fare.');
+  await say('All in my pocketbook.');bump('pocket');res()};
+ paper()})}
+
+/* ================= finale ================= */
+async function finale(){
+ flag('done');try{localStorage.setItem('blackseam-game-prologue-complete','1')}catch(_){}fadeP.textContent='';fadeEl.classList.add('on');await sleep(1200);
+ const sc=G.secrets.length;
+ ov.innerHTML=`<div class="card"><small>End of the prologue</small><h1>Cwm Du</h1><p>Glamorgan. September 1869. A government surveyor gets off the Taff Vale train with a theodolite, a letter from Colonel Sir Henry James, and a dead man’s notebook.</p><p>Money left: ${lsd(G.money)}${F('smith')?' · Pawned as “Mr Smith”':''}</p><div class="row"><a class="btn" href="painterly-scene.html">Visit Cwm Du (scene mockup)</a><button class="btn" id="again">Play the prologue again</button></div></div>`;
+ ov.classList.add('on');fadeEl.classList.remove('on');
+ document.getElementById('again').onclick=()=>{try{localStorage.removeItem(SAVE)}catch(_){}location.reload()}}
+
+/* ================= intro ================= */
+async function intro(){
+ await line('Mr Grice','Mr Crane. A moment.');
+ await line('Mr Grice','Mr Bevan’s effects. His daughter has written for them. Box them up and send them by railway parcel from Paddington.');
+ await line('Mr Grice','And take this to Mr Dobbs at the Coal Exchange. Mr Hallam wants it in his hand today, not tomorrow.');give('hlletter');
+ await speak('Paddington is not on the way to Lower Thames Street, Mr Grice.');
+ await line('Mr Grice','Then you had better start walking, Mr Crane.');
+ await say('Thirty years at that desk, and they box him up in an afternoon.')}
+function titleCard(cont){
+ ov.innerHTML=`<div class="card"><small>Black Seam · Prologue</small><h1>Bevan’s box</h1><p>London, September 1869. Elias Crane has drawn other men’s mines for eleven years. On Tuesday Josiah Bevan, the old surveyor at the next desk, died at his work. This afternoon his belongings are being packed into a tea chest for his daughter.</p><div class="row"><button class="btn" id="go">${cont?'Continue':'Begin'}</button>${cont?'<button class="btn" id="restart">Start again</button>':''}</div><p style="font-size:15px">Click or tap to walk and to use things. Hold space, or the magnifier on touch screens, to show what you can interact with.</p></div>`;
+ ov.classList.add('on');
+ document.getElementById('go').onclick=()=>{ov.classList.remove('on');audio.start();syncSnd();if(!cont)run(intro)};
+ const r=document.getElementById('restart');if(r)r.onclick=()=>{try{localStorage.removeItem(SAVE)}catch(_){}G=fresh();enterScene('office');ui();ov.classList.remove('on');audio.start();syncSnd();run(intro)}}
+
+/* ================= walking & input ================= */
+function walkTo(x){return new Promise(res=>{const [a,b]=scene.walk;let lim=b;const gate=scene.gate&&scene.gate();if(gate)lim=Math.min(lim,gate);
+ x=Math.max(a,Math.min(lim,x));if(Math.abs(x-crane.x)<8||window.__fastWalk){crane.x=crane.tx=x;res();return}crane.tx=x;crane.dir=x>crane.x?1:-1;crane.walking=true;crane.res=res})}
+function centerPan(snap){if(!maxPan){pan=0;return}const target=clampPan(W/2-(crane.x*S+(W-VW*S)/2));pan=snap?target:pan+(target-pan)*.06}
+let drag=null;
+stage.addEventListener('pointerdown',e=>{if(e.target.closest('.tool,.hs,.label,.panel,.choices,.exit'))return;drag={x:e.clientX,y:e.clientY,moved:false,id:e.pointerId,p:pan}});
+addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){mouse=true;tx=(e.clientX/W)*2-1;ty=(e.clientY/H)*2-1;cur.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;if(sel)holdEl.style.transform=`translate(${e.clientX+22}px,${e.clientY+18}px)`}
+ if(drag&&e.pointerId===drag.id){const dx=e.clientX-drag.x;if(Math.abs(dx)>8)drag.moved=true;if(drag.moved&&maxPan){pan=clampPan(drag.p+dx);manualPan=performance.now()}}});
+let manualPan=0;
+addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=null;if(d.moved)return;
+ if(adv){adv();return}
+ if(busy||ov.classList.contains('on'))return;
+ if(tab){closePanel();return}
+ if(document.querySelector('.label.open')){clearLabels();return}
+ if(sel){setSel(null);return}
+ const vx=(e.clientX-OX)/S,vy=(e.clientY-OY)/S;if(vy>620)run(()=>walkTo(vx))});
+addEventListener('pointerdown',e=>{const m=e.pointerType==='mouse';if(m!==mouse){mouse=m;setHint();setSel(sel)}},true);
+addEventListener('keydown',e=>{
+ if(e.code==='Space'||e.code==='Enter'){if(adv&&!e.target.closest?.('button')){e.preventDefault();adv();return}if(e.code==='Space'&&!ov.classList.contains('on')){document.body.classList.add('reveal');e.preventDefault()}}
+ if(e.key==='Escape'){clearLabels();setSel(null);closePanel();if(ov.classList.contains('on')&&ov.querySelector('#stay'))ov.classList.remove('on')}});
+addEventListener('keyup',e=>{if(e.code==='Space')document.body.classList.remove('reveal')});
+document.getElementById('look').addEventListener('click',e=>{e.stopPropagation();document.body.classList.toggle('reveal')});
+const hintEl=document.getElementById('hint');function setHint(){hintEl.textContent=mouse?'Click to walk · red arrows are exits (double-click to hurry) · hold space to show hotspots':'Tap to walk · red arrows are exits · tap the magnifier to show hotspots'}setHint();
+
+/* ================= audio ================= */
+const audio=(()=>{
+ let ac=null,master,mus,ambG={},started=false,muted=false,t0=0,next=0,want='rain',noiseBuf;
+ const BPM=80,SPB=60/BPM,HALF=SPB/2;const MAJ=[0,2,4,5,7,9,11];
+ const sem=d=>{const o=Math.floor(d/7),i=((d%7)+7)%7;return MAJ[i]+12*o};const hz=m=>440*Math.pow(2,(m-69)/12);
+ const MEL=[[4,2],[5,1],[4,1],[2,1],[0,1],[1,2],[2,1],[4,3],[5,2],[7,1],[6,1],[5,1],[4,1],[2,1.5],[1,.5],[2,1],[0,3],[7,2],[6,1],[5,1],[4,1],[2,1],[3,2],[5,1],[4,3],[2,1],[4,1],[5,1],[4,1],[2,1],[1,1],[1,1.5],[2,.5],[1,1],[0,3]];
+ const CH=[0,0,4,0,3,0,4,0,5,3,3,0,1,4,4,0];const LOOP=96+24,ev=Array.from({length:LOOP},()=>[]);
+ {let b=0;for(const[d,l]of MEL){ev[Math.round(b*2)].push({k:'m',d,l});b+=l}}
+ CH.forEach((r,bar)=>{ev[bar*6].push({k:'b',r});ev[bar*6+2].push({k:'c',r});ev[bar*6+4].push({k:'c',r,soft:1})});
+ const G_=(d,v=0)=>{const g=ac.createGain();g.gain.value=v;g.connect(d);return g};
+ function piano(t,m,v){const f=hz(m),g=G_(mus);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.11*v,t+.006);g.gain.exponentialRampToValueAtTime(.03*v,t+.35);g.gain.exponentialRampToValueAtTime(.0001,t+2.4);
+  for(const[r,a,ty]of[[1,1,'triangle'],[2,.3,'sine'],[3,.1,'sine']]){const o=ac.createOscillator();o.type=ty;o.frequency.value=f*r;o.detune.value=(Math.random()-.5)*6;const gg=G_(g,a);o.connect(gg);o.start(t);o.stop(t+2.5)}}
+ function sched(h,t){for(const e of ev[h%LOOP]){if(e.k==='m')piano(t,74+sem(e.d),.8);else if(e.k==='b'){let m=50+sem(e.r)%12;if(m>55)m-=12;piano(t,m-12,.7)}else if(e.k==='c'){for(const k of[2,4]){let m=62+sem(e.r+k)%12;if(m>69)m-=12;piano(t,m,e.soft?.32:.42)}}}}
+ function tick(){const now=ac.currentTime;if(t0+next*HALF<now-1)next=Math.ceil((now-t0)/HALF);while(t0+next*HALF<now+.2){const t=t0+next*HALF;if(t>=now-.01)sched(next,t);next++}}
+ function bed(name,type,f,q,v){const n=ac.createBufferSource();n.buffer=noiseBuf;n.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=G_(master,0);n.connect(fl);fl.connect(g);n.start();ambG[name]={g,v};return fl}
+ function start(){if(started)return;started=true;
+  ac=new (window.AudioContext||window.webkitAudioContext)();ac.resume();
+  master=ac.createGain();master.gain.value=0;const comp=ac.createDynamicsCompressor();comp.threshold.value=-14;master.connect(comp);comp.connect(ac.destination);
+  const len=ac.sampleRate*2.2,ir=ac.createBuffer(2,len,ac.sampleRate);for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3)}
+  const rev=ac.createConvolver();rev.buffer=ir;mus=ac.createGain();mus.gain.value=.55;mus.connect(master);mus.connect(rev);const wet=G_(master,.25);rev.connect(wet);
+  noiseBuf=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);{const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+  bed('rain','bandpass',2600,.35,.05);
+  const cr=bed('crowd','bandpass',520,1.1,.09);{const l=ac.createOscillator();l.frequency.value=.37;const lg=G_(cr.frequency,140);l.connect(lg);l.start()}
+  bed('steam','lowpass',220,.7,.12);
+  t0=ac.currentTime+.2;next=0;setInterval(tick,25);tick();
+  master.gain.linearRampToValueAtTime(muted?0:.85,ac.currentTime+2);scene(want);
+  document.addEventListener('visibilitychange',()=>{if(ac)document.hidden?ac.suspend():ac.resume()})}
+ function scene(name){want=name;if(!ac)return;const now=ac.currentTime;for(const k in ambG){const a=ambG[k];a.g.gain.cancelScheduledValues(now);a.g.gain.setValueAtTime(a.g.gain.value,now);a.g.gain.linearRampToValueAtTime(k===name?a.v:0,now+1.5)}}
+ function whistle(){if(!ac)return;const t=ac.currentTime+.1;for(const f of[740,880,1110]){const o=ac.createOscillator();o.type='sawtooth';o.frequency.value=f;const lp=ac.createBiquadFilter();lp.type='bandpass';lp.frequency.value=f;lp.Q.value=4;const g=G_(master);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+.08);g.gain.setValueAtTime(.05,t+1.4);g.gain.linearRampToValueAtTime(0,t+1.8);o.connect(lp);lp.connect(g);o.start(t);o.stop(t+2)}}
+ function setMuted(m){muted=m;if(!ac)return;const g=master.gain,now=ac.currentTime;g.cancelScheduledValues(now);g.setValueAtTime(g.value,now);g.linearRampToValueAtTime(m?0:.85,now+.4)}
+ return{start,scene,whistle,setMuted,get started(){return started},get muted(){return muted}}})();
+const sndBtn=document.getElementById('snd');
+function syncSnd(){const on=audio.started&&!audio.muted;sndBtn.classList.toggle('muted',!on);sndBtn.querySelector('.tip').textContent=on?'Sound on':'Sound off'}
+sndBtn.addEventListener('click',e=>{e.stopPropagation();if(!audio.started)audio.start();else audio.setMuted(!audio.muted);syncSnd()});
+
+/* ================= loop ================= */
+function post(){
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+ const v=ctx.createRadialGradient(W/2,H*.55,Math.min(W,H)*.28,W/2,H*.55,Math.max(W,H)*.8);v.addColorStop(0,'rgba(6,4,2,0)');v.addColorStop(1,'rgba(6,4,2,.7)');ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+ ctx.save();ctx.globalAlpha=.06;ctx.globalCompositeOperation='overlay';ctx.translate((Math.random()*200)|0,(Math.random()*200)|0);ctx.fillStyle=grainPat;ctx.fillRect(-200,-200,W+400,H+400);ctx.restore()}
+let last=performance.now();
+function frame(t){
+ const dt=Math.min(50,t-last);last=t;
+ if(innerWidth!==W||innerHeight!==H)resize();
+ if(!W||!H||!scene){requestAnimationFrame(frame);return}
+ if(crane.walking){const d=crane.tx-crane.x,step=.3*dt;if(Math.abs(d)<=step){crane.x=crane.tx;crane.walking=false;const r=crane.res;crane.res=null;r&&r()}else{crane.x+=Math.sign(d)*step;crane.phase+=dt*.011}}
+ if(!mouse){tx=maxPan?-pan/maxPan*.6:0;ty=0}
+ mx+=(tx-mx)*.05;my+=(ty-my)*.05;
+ if(performance.now()-manualPan>1500)centerPan(false);
+ OX=(W-VW*S)/2+pan;
+ ctx=main;ctx.setTransform(DPR*S,0,0,DPR*S,DPR*OX,DPR*OY);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+ scene.bg(t,dt);drawCrane(t,PAL[scene.pal]);
+ post();
+ for(const{h,el,lb,ex}of hsEls){const show=!h.show||h.show();const o=off(.25);
+  if(ex){el.style.display='none';ex.style.display=show?'':'none';if(!show)continue;const cx=Math.max(34,Math.min(W-34,(h.x+h.w/2+o.x)*S+OX)),cy=Math.max(130,Math.min(H-80,(h.y+h.h/2+o.y)*S+OY));ex.style.left=cx+'px';ex.style.top=cy+'px';lb.style.left=Math.max(110,Math.min(W-110,cx))+'px';lb.style.top=(cy-28)+'px';continue}
+  el.style.display=show&&h.h?'':'none';if(!show)continue;
+  const x=(h.x+o.x)*S+OX,y=(h.y+o.y)*S+OY;el.style.left=x+'px';el.style.top=y+'px';el.style.width=h.w*S+'px';el.style.height=h.h*S+'px';
+  const cx=x+h.w*S/2;lb.style.left=Math.max(110,Math.min(W-110,cx))+'px';lb.style.top=Math.max(130,y+Math.min(h.h*S*.35,60))+'px'}
+ requestAnimationFrame(frame)}
+
+/* ================= boot ================= */
+const saved=loadSave();
+if(saved){G=Object.assign(fresh(),saved)}
+enterScene(G.scene);ui();
+titleCard(!!saved);
+requestAnimationFrame(frame);
+/* debug hook for automated play-testing */
+window.__bs={get G(){return G},travel,draw:()=>{last=performance.now()-16;frame(performance.now())},
+ verb:(id,label)=>{const h=scene.hs.find(x=>x.id===id);const v=h&&(h.verbs?h.verbs():[]).filter(Boolean).find(v=>v[0]===label);if(!v)return'no verb '+id+'/'+label;run(async()=>{if(label!=='Leave')await walkTo(h.wx);if(await blocked(h))return;await v[1]()});return'ok'},
+ use:(it,id)=>{const h=scene.hs.find(x=>x.id===id);if(!h||!has(it))return'missing '+it+'/'+id;run(async()=>{await walkTo(h.wx);await useOn(it,h)});return'ok'},
+ combine:(a,b)=>{run(()=>combine(a,b));return'ok'}};
+})();
+</script>
+</body>
+</html>

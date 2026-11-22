@@ -1,0 +1,577 @@
+{
+ "scene": "office (incl. opening intro)",
+ "source": "mockups/prologue.html",
+ "tts": {
+  "model_id": "eleven_v4",
+  "generations_count": 1,
+  "voice_settings": "defaults"
+ },
+ "lines": [
+  {
+   "n": 0,
+   "speaker": "Mr Grice",
+   "text": "Mr Crane. A moment.",
+   "file": "00-grice.mp3"
+  },
+  {
+   "n": 1,
+   "speaker": "Mr Grice",
+   "text": "Mr Bevan’s effects. His daughter has written for them. Box them up and send them by railway parcel from Paddington.",
+   "file": "01-grice.mp3"
+  },
+  {
+   "n": 2,
+   "speaker": "Mr Grice",
+   "text": "And take this to Mr Dobbs at the Coal Exchange. Mr Hallam wants it in his hand today, not tomorrow.",
+   "file": "02-grice.mp3"
+  },
+  {
+   "n": 3,
+   "speaker": "Crane",
+   "text": "Paddington is not on the way to Lower Thames Street, Mr Grice.",
+   "file": "03-crane.mp3"
+  },
+  {
+   "n": 4,
+   "speaker": "Mr Grice",
+   "text": "Then you had better start walking, Mr Crane.",
+   "file": "04-grice.mp3"
+  },
+  {
+   "n": 5,
+   "speaker": "Crane",
+   "text": "Thirty years at that desk, and they box him up in an afternoon.",
+   "file": "05-crane.mp3"
+  },
+  {
+   "n": 6,
+   "speaker": "Tom",
+   "text": "Is that for the stove, sir? Bit small.",
+   "file": "06-tom.mp3"
+  },
+  {
+   "n": 7,
+   "speaker": "Crane",
+   "text": "No, Tom. It’s for later.",
+   "file": "07-crane.mp3"
+  },
+  {
+   "n": 8,
+   "speaker": "Tom",
+   "text": "Nice watch, sir. Shame it don’t go.",
+   "file": "08-tom.mp3"
+  },
+  {
+   "n": 9,
+   "speaker": "Crane",
+   "text": "Coal in August. Mr Grice says the damp gets into the drawings, and Mr Grice is always right.",
+   "file": "09-crane.mp3"
+  },
+  {
+   "n": 10,
+   "speaker": "Crane",
+   "text": "Burn it? Not in here. If it’s what I think, I want it whole, and I want a coal man to see it.",
+   "file": "10-crane.mp3"
+  },
+  {
+   "n": 11,
+   "speaker": "Crane",
+   "text": "Eleven years at this table. Other men’s mines, other men’s money, drawn very neatly.",
+   "file": "11-crane.mp3"
+  },
+  {
+   "n": 12,
+   "speaker": "Crane",
+   "text": "Rain on Westminster. The clock tower is a grey ghost today. Good light for tracing, though, if you hold the paper flat to the glass.",
+   "file": "12-crane.mp3"
+  },
+  {
+   "n": 13,
+   "speaker": "Crane",
+   "text": "The Geological Survey’s map. A great black basin of coal from Pontypool to St Brides Bay, and the valleys cut into it like fingers.",
+   "file": "13-crane.mp3"
+  },
+  {
+   "n": 14,
+   "speaker": "Crane",
+   "text": "Thirty years at this desk. He died at it on Tuesday, between one sentence and the next. Nobody has sat there since.",
+   "file": "14-crane.mp3"
+  },
+  {
+   "n": 15,
+   "speaker": "Crane",
+   "text": "Half packed. Thirty years of a man, and room to spare.",
+   "file": "15-crane.mp3"
+  },
+  {
+   "n": 16,
+   "speaker": "Crane",
+   "text": "An empty tea chest from the clerks’ room. It still smells of Assam.",
+   "file": "16-crane.mp3"
+  },
+  {
+   "n": 17,
+   "speaker": "Crane",
+   "text": "His field book. By rights it goes in with the rest.",
+   "file": "17-crane.mp3"
+  },
+  {
+   "n": 18,
+   "speaker": "Crane",
+   "text": "…No. Not yet.",
+   "file": "18-crane.mp3"
+  },
+  {
+   "n": 19,
+   "speaker": "Crane",
+   "text": "His coal sample? No. That stays with me.",
+   "file": "19-crane.mp3"
+  },
+  {
+   "n": 20,
+   "speaker": "Crane",
+   "text": "She doesn’t need his pencils.",
+   "file": "20-crane.mp3"
+  },
+  {
+   "n": 21,
+   "speaker": "Crane",
+   "text": "The firm’s correspondence, filed by Mr Grice, by year, by client, by the will of God.",
+   "file": "21-crane.mp3"
+  },
+  {
+   "n": 22,
+   "speaker": "Mr Grice",
+   "text": "Personal effects go in the box, Mr Crane. Not on my desk.",
+   "file": "22-grice.mp3"
+  },
+  {
+   "n": 23,
+   "speaker": "Crane",
+   "text": "Not to Grice. Grice would file it.",
+   "file": "23-crane.mp3"
+  },
+  {
+   "n": 24,
+   "speaker": "Crane",
+   "text": "The speaking tube to Mr Hallam’s room. You blow, it whistles upstairs, and Mr Hallam asks who has disturbed him.",
+   "file": "24-crane.mp3"
+  },
+  {
+   "n": 25,
+   "speaker": "Crane",
+   "text": "And say what? No.",
+   "file": "25-crane.mp3"
+  },
+  {
+   "n": 26,
+   "speaker": "Crane",
+   "text": "One empty shelf. Mr Grice will notice on Monday.",
+   "file": "26-crane.mp3"
+  },
+  {
+   "n": 27,
+   "speaker": "Crane",
+   "text": "Levels, chains, and the good theodolite: a five-inch Troughton & Simms. Forty guineas, under lock and key.",
+   "file": "27-crane.mp3"
+  },
+  {
+   "n": 28,
+   "speaker": "Crane",
+   "text": "Nothing in there I need now.",
+   "file": "28-crane.mp3"
+  },
+  {
+   "n": 29,
+   "speaker": "Crane",
+   "text": "Locked. Mr Grice has the key, and Mr Grice has rules.",
+   "file": "29-crane.mp3"
+  },
+  {
+   "n": 30,
+   "speaker": "Tom",
+   "text": "I got a clip round the ear for that, sir. Worth it though.",
+   "file": "30-tom.mp3"
+  },
+  {
+   "n": 31,
+   "speaker": "Tom",
+   "text": "Mr Bevan used to give me humbugs, sir. Now nobody does.",
+   "file": "31-tom.mp3",
+   "from_pilot": "tom-1"
+  },
+  {
+   "n": 32,
+   "speaker": "Crane",
+   "text": "Life is hard, Tom.",
+   "file": "32-crane.mp3"
+  },
+  {
+   "n": 33,
+   "speaker": "Tom",
+   "text": "It’s harder without humbugs, sir.",
+   "file": "33-tom.mp3",
+   "from_pilot": "tom-2"
+  },
+  {
+   "n": 34,
+   "speaker": "Crane",
+   "text": "Tom. A penny says Mr Pike wants Mr Grice in the strongroom. Urgently.",
+   "file": "34-crane.mp3"
+  },
+  {
+   "n": 35,
+   "speaker": "Tom",
+   "text": "Mr Pike’s in Brighton, sir.",
+   "file": "35-tom.mp3"
+  },
+  {
+   "n": 36,
+   "speaker": "Crane",
+   "text": "Mr Grice doesn’t know that.",
+   "file": "36-crane.mp3"
+  },
+  {
+   "n": 37,
+   "speaker": "Tom",
+   "text": "…Make it tuppence?",
+   "file": "37-tom.mp3"
+  },
+  {
+   "n": 38,
+   "speaker": "Tom",
+   "text": "Pleasure doing business, sir.",
+   "file": "38-tom.mp3"
+  },
+  {
+   "n": 39,
+   "speaker": "Tom",
+   "text": "Robbery, that is.",
+   "file": "39-tom.mp3"
+  },
+  {
+   "n": 40,
+   "speaker": "Tom",
+   "text": "Mr GRICE! Mr Pike wants you in the strongroom, sir! Urgent!",
+   "file": "40-tom.mp3",
+   "from_pilot": "tom-3"
+  },
+  {
+   "n": 41,
+   "speaker": "Mr Grice",
+   "text": "Mr Pike? He wasn’t in this morning…",
+   "file": "41-grice.mp3"
+  },
+  {
+   "n": 42,
+   "speaker": "Mr Grice",
+   "text": "Very well. Touch nothing, any of you.",
+   "file": "42-grice.mp3"
+  },
+  {
+   "n": 43,
+   "speaker": "Crane",
+   "text": "Now. Quickly.",
+   "file": "43-crane.mp3"
+  },
+  {
+   "n": 44,
+   "speaker": "Crane",
+   "text": "A pad of the firm’s blank chits. A humbug, which I’ll keep from Tom.",
+   "file": "44-crane.mp3"
+  },
+  {
+   "n": 45,
+   "speaker": "Crane",
+   "text": "My ventilation plan for the Ystrad level, signed off by Mr Hallam himself. He signs everything I draw. He’s never once read one.",
+   "file": "45-crane.mp3"
+  },
+  {
+   "n": 46,
+   "speaker": "Crane",
+   "text": "His pen tray, his spectacles, a half-written letter.",
+   "file": "46-crane.mp3"
+  },
+  {
+   "n": 47,
+   "speaker": "Crane",
+   "text": "A lump of coal with a paper label. And his field book.",
+   "file": "47-crane.mp3"
+  },
+  {
+   "n": 48,
+   "speaker": "Crane",
+   "text": "His daughter gets the personal effects. The firm gets nothing. That’s what Grice said.",
+   "file": "48-crane.mp3"
+  },
+  {
+   "n": 49,
+   "speaker": "Crane",
+   "text": "His last letter, unfinished. She should have it.",
+   "file": "49-crane.mp3"
+  },
+  {
+   "n": 50,
+   "speaker": "Crane",
+   "text": "His spectacles. One lens cracked.",
+   "file": "50-crane.mp3"
+  },
+  {
+   "n": 51,
+   "speaker": "Crane",
+   "text": "That’s everything that belongs to her. Everything personal, anyway.",
+   "file": "51-crane.mp3"
+  },
+  {
+   "n": 52,
+   "speaker": "Crane",
+   "text": "Lid on. Twelve nails. Addressed to Mrs Gwen Rees, Pen-y-graig, Cwm Du, near Pontypridd.",
+   "file": "52-crane.mp3"
+  },
+  {
+   "n": 53,
+   "speaker": "Crane",
+   "text": "His notebook is not in it.",
+   "file": "53-crane.mp3"
+  },
+  {
+   "n": 54,
+   "speaker": "Mr Grice",
+   "text": "The firm’s correspondence is the firm’s business, Mr Crane.",
+   "file": "54-grice.mp3"
+  },
+  {
+   "n": 55,
+   "speaker": "Crane",
+   "text": "He hasn’t looked up. He never needs to. If something called him away from that desk for a minute… Tom would shout anything for a penny.",
+   "file": "55-crane.mp3"
+  },
+  {
+   "n": 56,
+   "speaker": "Crane",
+   "text": "Southampton… Ordnance Survey… here.",
+   "file": "56-crane.mp3"
+  },
+  {
+   "n": 57,
+   "speaker": "Mr Grice",
+   "text": "Mr Pike is in Brighton, Thomas.",
+   "file": "57-grice.mp3"
+  },
+  {
+   "n": 58,
+   "speaker": "Tom",
+   "text": "Must’ve been Mr Bevan’s ghost, sir.",
+   "file": "58-tom.mp3"
+  },
+  {
+   "n": 59,
+   "speaker": "Mr Grice",
+   "text": "Ghosts do not shout up stairwells.",
+   "file": "59-grice.mp3",
+   "from_pilot": "grice-3"
+  },
+  {
+   "n": 60,
+   "speaker": "Crane",
+   "text": "Government paper comes folded double, and the second leaf is blank, with the Crown embossed in the corner.",
+   "file": "60-crane.mp3"
+  },
+  {
+   "n": 61,
+   "speaker": "Crane",
+   "text": "Letter to the glass, blank leaf over it. The light comes through the signature.",
+   "file": "61-crane.mp3"
+  },
+  {
+   "n": 62,
+   "speaker": "Crane",
+   "text": "“H. James, Colonel R.E., Director-General.” Slowly. Don’t stop in the middle of a stroke. Bevan taught me that.",
+   "file": "62-crane.mp3"
+  },
+  {
+   "n": 63,
+   "speaker": "Crane",
+   "text": "“The bearer, Mr E. Crane, Civil Assistant, is authorised to enter upon lands…” Any farmer in Wales would open his gate to that.",
+   "file": "63-crane.mp3"
+  },
+  {
+   "n": 64,
+   "speaker": "Crane",
+   "text": "I need Hallam’s signature to copy.",
+   "file": "64-crane.mp3"
+  },
+  {
+   "n": 65,
+   "speaker": "Crane",
+   "text": "I need Hallam’s signature to copy. It’s on the drawing on my table.",
+   "file": "65-crane.mp3"
+  },
+  {
+   "n": 66,
+   "speaker": "Crane",
+   "text": "Hallam’s signature I have. I need something to write the order on. There’s a pad of the firm’s chits in my table drawer.",
+   "file": "66-crane.mp3"
+  },
+  {
+   "n": 67,
+   "speaker": "Crane",
+   "text": "A blank chit, the drawing behind it, both against the glass. “Please supply bearer with the five-inch Troughton & Simms.”",
+   "file": "67-crane.mp3"
+  },
+  {
+   "n": 68,
+   "speaker": "Crane",
+   "text": "“R. Hallam.” The R is a fishhook, and the tail drags. There.",
+   "file": "68-crane.mp3"
+  },
+  {
+   "n": 69,
+   "speaker": "Crane",
+   "text": "The drawing can go back on my table. Nobody will miss it for a minute.",
+   "file": "69-crane.mp3"
+  },
+  {
+   "n": 70,
+   "speaker": "Mr Grice",
+   "text": "The letter to Mr Dobbs at the Coal Exchange, by hand, today.",
+   "file": "70-grice.mp3"
+  },
+  {
+   "n": 71,
+   "speaker": "Mr Grice",
+   "text": "Mr Bevan’s personal effects boxed up for his daughter. The tea chest is by his desk. The firm’s papers stay here.",
+   "file": "71-grice.mp3"
+  },
+  {
+   "n": 72,
+   "speaker": "Mr Grice",
+   "text": "That box to the parcels office at Paddington. The Post Office does not take parcels, Mr Crane, whatever you young men think.",
+   "file": "72-grice.mp3"
+  },
+  {
+   "n": 73,
+   "speaker": "Mr Grice",
+   "text": "Then the box to the parcels office at Paddington. The Post Office does not take parcels, Mr Crane, whatever you young men think.",
+   "file": "73-grice.mp3"
+  },
+  {
+   "n": 74,
+   "speaker": "Mr Grice",
+   "text": "Thirty years, and never once late. The firm sent a wreath.",
+   "file": "74-grice.mp3"
+  },
+  {
+   "n": 75,
+   "speaker": "Crane",
+   "text": "From the petty cash.",
+   "file": "75-crane.mp3"
+  },
+  {
+   "n": 76,
+   "speaker": "Mr Grice",
+   "text": "From the petty cash, Mr Crane.",
+   "file": "76-grice.mp3",
+   "from_pilot": "grice-2"
+  },
+  {
+   "n": 77,
+   "speaker": "Mr Grice",
+   "text": "Instruments go out on Mr Hallam’s written order, and only on Mr Hallam’s written order. Signed for in the book.",
+   "file": "77-grice.mp3",
+   "from_pilot": "grice-1"
+  },
+  {
+   "n": 78,
+   "speaker": "Mr Grice",
+   "text": "Mr Hallam’s hand.",
+   "file": "78-grice.mp3"
+  },
+  {
+   "n": 79,
+   "speaker": "Mr Grice",
+   "text": "The Troughton & Simms. What does Mr Hallam want with it?",
+   "file": "79-grice.mp3"
+  },
+  {
+   "n": 80,
+   "speaker": "Mr Grice",
+   "text": "Surrey. Hmph. Mud.",
+   "file": "80-grice.mp3"
+  },
+  {
+   "n": 81,
+   "speaker": "Mr Grice",
+   "text": "Quite right.",
+   "file": "81-grice.mp3"
+  },
+  {
+   "n": 82,
+   "speaker": "Mr Grice",
+   "text": "Sign the book.",
+   "file": "82-grice.mp3"
+  },
+  {
+   "n": 83,
+   "speaker": "Crane",
+   "text": "“E. Crane. One theodolite, five-inch, with stand.”",
+   "file": "83-crane.mp3"
+  },
+  {
+   "n": 84,
+   "speaker": "Mr Grice",
+   "text": "Bring it back clean.",
+   "file": "84-grice.mp3"
+  },
+  {
+   "n": 85,
+   "speaker": "Crane",
+   "text": "“Cae’r Glo, below Pen-y-graig. Seam six feet. Tell no one.” I know it by heart already.",
+   "file": "85-crane.mp3",
+   "scene": "rubbing"
+  },
+  {
+   "n": 86,
+   "speaker": "Crane",
+   "text": "Cae’r Glo. Below Pen-y-graig. Pen-y-graig: the farm on his letter. His own land.",
+   "file": "86-crane.mp3",
+   "scene": "rubbing"
+  },
+  {
+   "n": 87,
+   "speaker": "Crane",
+   "text": "Six feet of steam coal, and he told no one. Not the firm. Not even his daughter.",
+   "file": "87-crane.mp3",
+   "scene": "rubbing"
+  },
+  {
+   "n": 88,
+   "speaker": "Crane",
+   "text": "Thirty years drawing other men’s mines, Josiah, and you were sitting on one.",
+   "file": "88-crane.mp3",
+   "scene": "rubbing",
+   "from_pilot": "crane-1"
+  },
+  {
+   "n": 89,
+   "speaker": "Crane",
+   "text": "The night mail leaves Paddington at nine. Before then I need four things: what this coal is worth, a reason to be on other men’s land, an instrument to survey with, and the fare.",
+   "file": "89-crane.mp3",
+   "scene": "rubbing"
+  },
+  {
+   "n": 90,
+   "speaker": "Crane",
+   "text": "All in my pocketbook.",
+   "file": "90-crane.mp3",
+   "scene": "rubbing"
+  },
+  {
+   "n": 91,
+   "speaker": "Crane",
+   "text": "Not where Tom can see it. He’d have it in his mouth before it left my hand.",
+   "file": "91-crane.mp3",
+   "scene": "office"
+  }
+ ]
+}
