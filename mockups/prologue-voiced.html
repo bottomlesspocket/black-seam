@@ -104,6 +104,7 @@ body.holding #holding{display:block}
 .pin span{font-family:"Cormorant Garamond",serif;font-size:clamp(14px,2vw,19px);white-space:nowrap;text-shadow:0 1px 6px #000}
 .pin em{font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap}
 .pin.here i{background:var(--cream)}
+.pin.up{transform:translate(-50%,calc(-100% + 13px))}.pin.up span{order:1}.pin.up em{order:2}.pin.up i{order:3}
 .pin:hover span,.pin:focus-visible span{color:var(--gold)}
 .rub{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(640px,100%)}
 .rub canvas{position:relative;width:100%;height:auto;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6);touch-action:none;cursor:crosshair}
@@ -1016,7 +1017,7 @@ async function board(){
 /* ================= map & travel ================= */
 const ov=document.getElementById('ov'),fadeEl=document.getElementById('fade'),fadeP=document.getElementById('fadeP');
 const PLACES=[
- {id:'paddington',name:'Paddington station',sub:'Great Western Railway',x:12,y:14,how:'By the Underground Railway: steam, sulphur and gaslight, all the way to Paddington.'},
+ {id:'paddington',name:'Paddington station',sub:'Great Western Railway',x:19,y:25,up:1,how:'By the Underground Railway: steam, sulphur and gaslight, all the way to Paddington.'},
  {id:'pawn',name:'Mrs Hatch’s',sub:'Leather Lane, Holborn',x:53,y:30,how:'Up Chancery Lane in the rain to Leather Lane.'},
  {id:'office',name:'Hallam & Pike',sub:'Great George Street',x:33,y:57,how:'Back to Westminster, past the new Embankment works.'},
  {id:'exchange',name:'The Coal Exchange',sub:'Lower Thames Street',x:78,y:58,how:'East along the river by omnibus, past St Paul’s.'}];
@@ -1026,10 +1027,10 @@ function openMap(){
   <rect width="160" height="90" fill="#1b130d"/>
   <path d="M0 74 C 20 70 34 84 50 78 C 62 74 60 60 70 58 C 86 55 96 66 112 64 C 128 62 140 70 160 66" stroke="#5a6a72" stroke-width="5" fill="none" opacity=".75"/>
   <path d="M14 28 h30 v20 h-30z" fill="#2c3a24" opacity=".7"/>
-  <g stroke="rgba(233,184,106,.12)" stroke-width=".4" fill="none"><path d="M0 30 H160 M0 50 H160 M40 0 V90 M80 0 V90 M120 0 V90"/><path d="M19 13 L86 30 L124 52"/><path d="M53 52 L86 30"/></g>
+  <g stroke="rgba(233,184,106,.12)" stroke-width=".4" fill="none"><path d="M0 30 H160 M0 50 H160 M40 0 V90 M80 0 V90 M120 0 V90"/><path d="M30 22.5 L86 30 L124 52"/><path d="M53 52 L86 30"/></g>
   <text x="29" y="39" fill="rgba(243,227,196,.35)" font-size="3" font-family="IM Fell English, Georgia, serif" text-anchor="middle">Hyde Park</text>
   <text x="104" y="76" fill="rgba(243,227,196,.35)" font-size="3.2" font-family="IM Fell English, Georgia, serif" font-style="italic">River Thames</text>
- </svg>${PLACES.map(p=>`<button class="pin${p.id===G.scene?' here':''}" style="left:${p.x}%;top:${p.y}%" data-p="${p.id}"><i></i><span>${p.name}</span><em>${p.id===G.scene?'You are here':p.sub}</em></button>`).join('')}</div>
+ </svg>${PLACES.map(p=>`<button class="pin${p.id===G.scene?' here':''}${p.up?' up':''}" style="left:${p.x}%;top:${p.y}%" data-p="${p.id}"><i></i><span>${p.name}</span><em>${p.id===G.scene?'You are here':p.sub}</em></button>`).join('')}</div>
  <div style="text-align:center"><button class="btn" id="stay">Stay here</button></div></div>`;
  ov.classList.add('on');
  ov.querySelectorAll('.pin').forEach(b=>b.onclick=()=>{const p=PLACES.find(q=>q.id===b.dataset.p);ov.classList.remove('on');if(p.id!==G.scene)travel(p.id,p.how)});
