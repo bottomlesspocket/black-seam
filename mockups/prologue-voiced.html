@@ -213,7 +213,7 @@ function person(x,y,s,o,t){
  ctx.scale(s*(o.flip?-1:1),s);
  const br=reduce?0:Math.sin(t*.0015+(o.ph||0))*1.1,w=o.w||1,coat=o.coat||'#2a2622',rim=o.rim||'#8a7e70',skin=o.skin||'#d2a080',skinL=o.skinL||'#f2cca8';
  if(o.skirt){rimFill(P(p=>{p.moveTo(-22*w,-112);p.quadraticCurveTo(-44*w,-40,-54*w,0);p.lineTo(54*w,0);p.quadraticCurveTo(44*w,-40,22*w,-112);p.closePath()}),o.skirt,rim,-3,1)}
- else{rimFill(P(p=>{p.rect(-15*w,-64,11,62);p.rect(4*w,-64,11,62)}),o.trousers||'#1e1c1a',rim,-2,0);ctx.fillStyle='#0e0c0a';ctx.beginPath();ctx.ellipse(-10*w+2,-2,10,4,0,0,Math.PI*2);ctx.ellipse(10*w+2,-2,10,4,0,0,Math.PI*2);ctx.fill()}
+ else{const lt=o.short?-78:-64,lw=o.short?12.5:11;/* a short coat shows the trousers right up to the hem */rimFill(P(p=>{p.rect(-15*w-(lw-11)/2,lt,lw,-2-lt);p.rect(4*w-(lw-11)/2,lt,lw,-2-lt)}),o.trousers||'#1e1c1a',rim,-2,0);ctx.fillStyle='#0e0c0a';ctx.beginPath();ctx.ellipse(-10*w+2,-2,10,4,0,0,Math.PI*2);ctx.ellipse(10*w+2,-2,10,4,0,0,Math.PI*2);ctx.fill()}
  ctx.translate(0,br*.3);
  const hem=o.skirt?-108:(o.short?-72:-46);
  const bw=o.stout?12:0;
