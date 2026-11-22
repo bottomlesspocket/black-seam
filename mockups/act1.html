@@ -1887,7 +1887,7 @@ async function intro(){
  await say('If her father ever told her about the coal, she’ll never sell to me. I need to find out what she knows.');bump('pocket')}
 function titleCard(cont){
  ov.innerHTML=`<div class="card"><small>Black Seam · Act 1</small><h1>The survey</h1><p>Glamorgan, September 1869. Elias Crane gets off the Taff Vale train at Cwm Du as “Mr Crane of the Ordnance Survey”, carrying a theodolite, a forged letter and Josiah Bevan’s notebook.</p><div class="row"><button class="btn" id="go">${cont?'Continue':'Begin'}</button>${cont?'<button class="btn" id="restart">Start again</button>':''}</div><p style="font-size:15px">Click or tap to walk and to use things. Hold space, or the magnifier on touch screens, to show what you can interact with.</p></div>`;
- ov.classList.add('on');
+ ov.classList.add('on');audio.start();syncSnd();
  document.getElementById('go').onclick=()=>{ov.classList.remove('on');audio.start();syncSnd();if(!cont)run(intro)};
  const r=document.getElementById('restart');if(r)r.onclick=()=>{try{localStorage.removeItem(SAVE)}catch(_){}G=fresh();enterScene('halt');ui();ov.classList.remove('on');audio.start();syncSnd();run(intro)}}
 
@@ -2000,7 +2000,7 @@ const audio=(()=>{
    if(!on&&r.on)r.until=now+2;r.on=on}
   const f=orgLP.frequency;f.cancelScheduledValues(now);f.setValueAtTime(f.value,now);f.exponentialRampToValueAtTime(m==='organWall'?520:12000,now+.8)}
  function bed(name,type,f,q,v){const n=ac.createBufferSource();n.buffer=noiseBuf;n.loop=true;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const g=G_(master,0);n.connect(fl);fl.connect(g);n.start();ambG[name]={g,v};return fl}
- function start(){if(started)return;started=true;
+ function start(){if(started){if(ac&&ac.state!=='running')ac.resume();return}started=true;
   ac=new (window.AudioContext||window.webkitAudioContext)();ac.resume();
   master=ac.createGain();master.gain.value=0;const comp=ac.createDynamicsCompressor();comp.threshold.value=-14;master.connect(comp);comp.connect(ac.destination);
   const len=ac.sampleRate*2.2,ir=ac.createBuffer(2,len,ac.sampleRate);for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3)}
