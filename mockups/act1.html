@@ -767,8 +767,11 @@ function curScene(){return SC[G.scene]}
 const stone=(x,y,w,h,c1,c2)=>{ctx.fillStyle=lg(0,y,0,y+h,[c1,c2]);ctx.fillRect(x,y,w,h)};
 function courses(x,y,w,h,step,a){ctx.strokeStyle=`rgba(60,50,40,${a})`;ctx.lineWidth=1;for(let yy=y+step;yy<y+h;yy+=step){ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+w,yy);ctx.stroke();for(let xx=x+((yy/step)%2?10:30);xx<x+w;xx+=40){ctx.beginPath();ctx.moveTo(xx,yy-step);ctx.lineTo(xx,yy);ctx.stroke()}}}
 function win4(x,y,w,h,lit){ctx.fillStyle=lit?'#f6c27a':'#2d343a';ctx.fillRect(x,y,w,h);ctx.fillStyle=lit?'rgba(120,70,30,.8)':'#f6f2e8';ctx.fillRect(x+w/2-.8,y,1.6,h);ctx.fillRect(x,y+h/2-.8,w,1.6);ctx.strokeStyle=lit?'rgba(120,70,30,.8)':'#f6f2e8';ctx.lineWidth=1.6;ctx.strokeRect(x,y,w,h)}
-function slateRoof(x0,x1,yEave,yRidge,ov){rimFill(P(p=>{p.moveTo(x0-ov,yEave);p.lineTo(x0+16,yRidge);p.lineTo(x1-16,yRidge);p.lineTo(x1+ov,yEave);p.closePath()}),'#4e5660','#8c95a0',-2,2);
- ctx.strokeStyle='rgba(30,36,44,.35)';ctx.lineWidth=1;for(let y=yRidge+9;y<yEave;y+=9){ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke()}}
+function slateRoof(x0,x1,yEave,yRidge,ov){const roof=P(p=>{p.moveTo(x0-ov,yEave);p.lineTo(x0+16,yRidge);p.lineTo(x1-16,yRidge);p.lineTo(x1+ov,yEave);p.closePath()});rimFill(roof,'#4e5660','#8c95a0',-2,2);
+ /* courses of slate, kept inside the roof's sloped ends and clear of its rim */
+ ctx.save();ctx.clip(roof);ctx.strokeStyle='rgba(30,36,44,.35)';ctx.lineWidth=1;
+ for(let y=yRidge+9;y<yEave;y+=9){const k=(y-yRidge)/(yEave-yRidge),l=x0+16-(16+ov)*k,r=x1-16+(16+ov)*k;ctx.beginPath();ctx.moveTo(l+3,y);ctx.lineTo(r-3,y);ctx.stroke()}
+ ctx.restore()}
 function chimneySmoke(t,x,y,seed){for(let i=0;i<10;i++){const k=((t*.00022+i/10+seed)%1),xx=x+k*40+Math.sin(k*6+t*.001+seed*9)*5,yy=y-k*120;ctx.fillStyle=`rgba(236,236,232,${(1-k)*.35})`;ctx.beginPath();ctx.arc(xx,yy,3+k*14,0,Math.PI*2);ctx.fill()}}
 function groundBand(y0,c){ctx.fillStyle=lg(0,y0,0,1000,c);ctx.fillRect(-700,y0,3000,1100)}
 function backdrop(t,third=true){PIT.skyDay(t);if(!G.night)PIT.birds(t);PIT.hill(PIT.LAYERS[0],0);PIT.hill(PIT.LAYERS[1],0);PIT.fogBand(t,640,.12,.15,'235,244,246');if(third)PIT.hill(PIT.LAYERS[2],0)}

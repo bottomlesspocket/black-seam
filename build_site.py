@@ -83,10 +83,15 @@ a.chapter span{display:inline-block;margin-top:14px;font-size:13px;color:var(--g
 body.playing{overflow:hidden}
 footer a{color:var(--gold)}
 footer{margin-top:36px;font-size:12px;color:var(--muted);text-align:center;max-width:520px;line-height:1.6}
+#music{position:fixed;top:16px;right:16px;z-index:5;background:var(--card);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:13px Inter,system-ui,sans-serif;cursor:pointer}
+#music:hover,#music:focus-visible{color:var(--gold);border-color:var(--gold)}
+#music[aria-pressed="true"]{color:var(--gold)}
+body.playing #music{display:none}
 @media (prefers-reduced-motion:reduce){a.chapter{transition:none}}
 </style>
 </head>
 <body>
+<button id="music" type="button" aria-pressed="false">♪ Music</button>
 <header>
  <small>A Victorian adventure</small>
  <h1>Black Seam</h1>
@@ -123,7 +128,46 @@ function route(){
  lockAct1();
  if(CHAPTERS[id]){if(frame.dataset.ch!==id){frame.srcdoc=CHAPTERS[id];frame.dataset.ch=id}frame.hidden=false;document.body.classList.add('playing');document.title=NAMES[id];frame.focus()}
  else{frame.hidden=true;frame.removeAttribute('srcdoc');frame.dataset.ch='';document.body.classList.remove('playing');document.title='Black Seam'}}
-addEventListener('hashchange',route);route();
+/* title music: made live in the browser, so there is no file to download and it never loops.
+   A low string drone, slow minor chords, and a music box picking notes at random, all through a long reverb. */
+const Music=(()=>{let ac,master,bus,timer=null,ci=0,nextChord=0,nextNote=0;
+ const hz=m=>440*Math.pow(2,(m-69)/12);
+ const CHORDS=[[50,57,62,65,69],[46,53,58,62,65],[41,48,57,60,64],[45,52,57,61,64]]; /* D minor, B flat, F, A */
+ const BOX=[74,77,79,81,84,86]; /* D F G A C D */
+ function init(){ac=new(window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=0;
+  const comp=ac.createDynamicsCompressor();master.connect(comp);comp.connect(ac.destination);
+  const len=ac.sampleRate*3.5,ir=ac.createBuffer(2,len,ac.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+  const rv=ac.createConvolver();rv.buffer=ir;const wet=ac.createGain();wet.gain.value=.6;rv.connect(wet);wet.connect(master);
+  bus=ac.createGain();bus.connect(master);bus.connect(rv);
+  const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=300;const dg=ac.createGain();dg.gain.value=.07;lp.connect(dg);dg.connect(bus);
+  for(const[m,det]of[[38,-6],[38,5],[45,0]]){const o=ac.createOscillator();o.type='sawtooth';o.frequency.value=hz(m);o.detune.value=det;o.connect(lp);o.start()}
+  const lfo=ac.createOscillator(),lg=ac.createGain();lfo.frequency.value=.05;lg.gain.value=120;lfo.connect(lg);lg.connect(lp.frequency);lfo.start()}
+ function pad(notes,t){for(const m of notes){const o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();
+  o.type='triangle';o.frequency.value=hz(m);o.detune.value=(Math.random()-.5)*10;f.type='lowpass';f.frequency.value=1100;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.03,t+3);g.gain.setValueAtTime(.03,t+7);g.gain.linearRampToValueAtTime(0,t+11);
+  o.connect(f);f.connect(g);g.connect(bus);o.start(t);o.stop(t+11.2)}}
+ function pluck(m,t,v){const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0005,t+3.2);g.connect(bus);
+  for(const[k,a]of[[1,1],[2.01,.25]]){const o=ac.createOscillator(),og=ac.createGain();o.type='sine';o.frequency.value=hz(m)*k;og.gain.value=a;o.connect(og);og.connect(g);o.start(t);o.stop(t+3.3)}}
+ function tick(){const t=ac.currentTime;
+  if(t+.5>nextChord){pad(CHORDS[ci++%CHORDS.length],nextChord);nextChord+=8}
+  while(nextNote<t+.5){if(Math.random()<.7)pluck(BOX[Math.floor(Math.random()*BOX.length)]-(Math.random()<.3?12:0),nextNote,.04+Math.random()*.03);
+   nextNote+=[1.5,2,2,3,4][Math.floor(Math.random()*5)]}}
+ return{start(){if(!ac)init();ac.resume();if(!timer){nextChord=nextNote=ac.currentTime+.3;timer=setInterval(tick,200)}
+   master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(.5,ac.currentTime,1.5)},
+  stop(){if(!ac)return;master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(0,ac.currentTime,.5);
+   setTimeout(()=>{if(master.gain.value<.01&&timer){clearInterval(timer);timer=null;ac.suspend()}},2500)}}})();
+/* music is on unless the player turned it off; browsers only allow sound after a click or key press */
+const musicBtn=document.getElementById('music');
+let musicWanted=(()=>{try{return localStorage.getItem('blackseam-music')!=='off'}catch(_){return true}})(),musicArmed=false;
+function syncMusic(){const play=musicWanted&&musicArmed&&!document.body.classList.contains('playing')&&!document.hidden;
+ if(play)Music.start();else Music.stop();
+ musicBtn.setAttribute('aria-pressed',String(musicWanted));musicBtn.textContent=musicWanted?'♪ Music on':'♪ Music off'}
+musicBtn.onclick=e=>{e.stopPropagation();if(!musicArmed&&musicWanted){musicArmed=true;syncMusic();return}musicArmed=true;musicWanted=!musicWanted;try{localStorage.setItem('blackseam-music',musicWanted?'on':'off')}catch(_){}syncMusic()};
+for(const ev of['pointerdown','keydown'])addEventListener(ev,e=>{if(musicArmed||e.target===musicBtn)return;musicArmed=true;syncMusic()},{capture:true});
+document.addEventListener('visibilitychange',syncMusic);
+addEventListener('hashchange',()=>setTimeout(syncMusic));
+addEventListener('hashchange',route);route();syncMusic();
 /* start over: forget both chapters' saves and lock Act 1 again */
 document.getElementById('reset').onclick=e=>{e.preventDefault();if(!confirm('Start over? This forgets your progress in both chapters.'))return;
  try{for(const k of['blackseam-game-prologue-complete','blackseam-prologue-v2','blackseam-act1-v1'])localStorage.removeItem(k)}catch(_){}lockAct1()};
