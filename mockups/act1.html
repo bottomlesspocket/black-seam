@@ -1195,10 +1195,10 @@ function gwenSeated(x,y,cry,t){const c=FIG.gwen;ctx.save();ctx.translate(x,y);ct
  ctx.fillStyle='#4a3020';ctx.fillRect(34,-214,8,214);ctx.fillRect(-14,-96,56,8);ctx.fillRect(-12,-88,6,88);ctx.fillRect(30,-88,6,88);ctx.fillRect(34,-180,8,4);
  const sob=cry&&!reduce?Math.abs(Math.sin(t*.012))*3:0,br=reduce?0:Math.sin(t*.0015)*1;
  /* skirt over the seat and down to the floor */
- rimFill(P(p=>{p.moveTo(26,-152);p.quadraticCurveTo(38,-120,34,-90);p.quadraticCurveTo(-10,-112,-46,-104);p.quadraticCurveTo(-60,-60,-64,0);p.lineTo(18,0);p.quadraticCurveTo(14,-50,22,-88);p.lineTo(-16,-150);p.closePath()}),c.skirt,c.rim,-2,1);
+ rimFill(P(p=>{p.moveTo(-18,-120);p.lineTo(26,-120);p.quadraticCurveTo(38,-108,34,-90);p.lineTo(22,-88);p.quadraticCurveTo(14,-50,18,0);p.lineTo(-64,0);p.quadraticCurveTo(-60,-60,-50,-100);p.quadraticCurveTo(-36,-116,-18,-120);p.closePath()}),c.skirt,c.rim,-2,1);
  ctx.strokeStyle='rgba(0,0,0,.25)';ctx.lineWidth=1.5;for(const dx of[-40,-24]){ctx.beginPath();ctx.moveTo(dx,-96);ctx.quadraticCurveTo(dx-8,-50,dx-10,-2);ctx.stroke()}
  ctx.fillStyle='#14100c';ctx.beginPath();ctx.ellipse(-62,-2,11,4,0,0,Math.PI*2);ctx.fill();
- ctx.save();ctx.translate(0,-sob+br*.3);
+ ctx.save();ctx.translate(0,32-sob+br*.3);
  /* body, bent forward when she cries */
  ctx.save();ctx.translate(6,-150);ctx.rotate(cry?-.22:0);ctx.translate(-6,150);
  rimFill(P(p=>{p.moveTo(-18,-150);p.quadraticCurveTo(-28,-198,-20,-230);p.quadraticCurveTo(2,-242,22,-232);p.quadraticCurveTo(34,-196,26,-150);p.closePath()}),c.coat,c.rim,-2,1);
@@ -1216,8 +1216,8 @@ function gwenSeated(x,y,cry,t){const c=FIG.gwen;ctx.save();ctx.translate(x,y);ct
  if(cry){rimFill(P(p=>{p.moveTo(-10,-222);p.quadraticCurveTo(-32,-196,-28,-184);p.quadraticCurveTo(-26,-212,-22,-240);p.lineTo(-12,-240);p.quadraticCurveTo(-18,-206,-16,-196);p.quadraticCurveTo(-4,-206,2,-220);p.closePath()}),c.coat,c.rim,-2,1);
   ctx.fillStyle=c.skin;ctx.beginPath();ctx.ellipse(hx-12,hy+3,8,10,.3,0,Math.PI*2);ctx.ellipse(hx-6,hy+9,8,9,.1,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(hx-9,hy+6,10,11,0,0,Math.PI*2);ctx.fill()}
- else{rimFill(P(p=>{p.moveTo(-6,-222);p.quadraticCurveTo(-18,-180,-30,-136);p.lineTo(-40,-128);p.lineTo(-36,-120);p.lineTo(-22,-130);p.quadraticCurveTo(-6,-176,4,-218);p.closePath()}),c.coat,c.rim,-2,1);
-  ctx.fillStyle=c.skin;ctx.beginPath();ctx.ellipse(-42,-124,6,4.5,0,0,Math.PI*2);ctx.fill()}
+ else{rimFill(P(p=>{p.moveTo(-6,-222);p.quadraticCurveTo(-18,-184,-30,-150);p.lineTo(-40,-144);p.lineTo(-36,-136);p.lineTo(-22,-144);p.quadraticCurveTo(-6,-180,4,-218);p.closePath()}),c.coat,c.rim,-2,1);
+  ctx.fillStyle=c.skin;ctx.beginPath();ctx.ellipse(-42,-140,6,4.5,0,0,Math.PI*2);ctx.fill()}
  ctx.restore();ctx.restore();ctx.restore()}
 function kitchenBg(t){
  /* scale, matched to the Black Lion: a person standing at the back wall has their head at about y 500, so a metre is about 145 units */
