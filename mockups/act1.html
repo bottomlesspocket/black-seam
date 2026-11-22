@@ -153,7 +153,7 @@ const hud=document.getElementById('hud'),cur=document.getElementById('cursor'),s
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let W,H,DPR,S,OX,OY,pan=0,maxPan=0;
 const clampPan=p=>Math.max(-maxPan,Math.min(maxPan,p));
-function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;S=Math.max(W/VW,Math.min(H/VH,W*1.9/VW));maxPan=Math.max(0,(VW*S-W)/2);pan=clampPan(pan);OX=(W-VW*S)/2+pan;OY=(H-VH*S)/2}
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;/* wider than 16:9: fill the width, but crop at most an eighth of the height (more only on very wide screens, rather than show bars at the sides), and take the crop from the top so the floor and Crane's feet stay in view */const wide=W/H>VW/VH;S=wide?Math.max(Math.min(W/VW,H/(VH*.875)),W/(VW+60)):Math.max(W/VW,Math.min(H/VH,W*1.9/VW));maxPan=Math.max(0,(VW*S-W)/2);pan=clampPan(pan);OX=(W-VW*S)/2+pan;OY=wide&&VH*S>H?H-VH*S:(H-VH*S)/2}
 addEventListener('resize',resize);resize();
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const P=f=>{const p=new Path2D();f(p);return p};
