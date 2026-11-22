@@ -443,7 +443,7 @@ function ui(){
  if(tab)renderPanel()}
 
 /* ---- Cae'r Glo: the 1869 pithead painting, ported unchanged from painterly-scene.html ---- */
-const PIT=(()=>{const off=d=>({x:-mx*d*42,y:-my*d*12});
+const PIT=(()=>{const off=d=>({x:-mx*d*42,y:0});
 function ridge(x,base,waves){let y=base;for(const[a,f,p]of waves)y+=a*Math.sin(x*f+p);return y}
 const SUN={x:1130,y:612};
 const LAYERS=[
