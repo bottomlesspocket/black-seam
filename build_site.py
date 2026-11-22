@@ -87,10 +87,18 @@ footer{margin-top:36px;font-size:12px;color:var(--muted);text-align:center;max-w
 #music:hover,#music:focus-visible{color:var(--gold);border-color:var(--gold)}
 #music[aria-pressed="true"]{color:var(--gold)}
 body.playing #music{display:none}
+#welcome{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center;cursor:pointer;
+ background:radial-gradient(ellipse at 50% 40%,rgba(233,184,106,.12),transparent 60%),var(--bg);transition:opacity .9s}
+#welcome h2{font-family:"Cormorant Garamond",serif;font-weight:400;font-size:clamp(34px,7vw,64px);line-height:1.1}
+#welcome p{font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);animation:pulse 2.4s ease-in-out infinite}
+#welcome.gone{opacity:0;pointer-events:none}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){#welcome p{animation:none}#welcome{transition:none}}
 @media (prefers-reduced-motion:reduce){a.chapter{transition:none}}
 </style>
 </head>
 <body>
+<div id="welcome" role="button" tabindex="0" aria-label="Welcome to Black Seam. Click anywhere to begin"><h2>Welcome to Black Seam</h2><p>Click anywhere to begin</p></div>
 <button id="music" type="button" aria-pressed="false">♪ Music</button>
 <header>
  <small>A Victorian adventure</small>
@@ -166,6 +174,13 @@ function syncMusic(){const play=musicWanted&&musicArmed&&!document.body.classLis
 musicBtn.onclick=e=>{e.stopPropagation();if(!musicArmed&&musicWanted){musicArmed=true;syncMusic();return}musicArmed=true;musicWanted=!musicWanted;try{localStorage.setItem('blackseam-music',musicWanted?'on':'off')}catch(_){}syncMusic()};
 for(const ev of['pointerdown','keydown'])addEventListener(ev,e=>{if(musicArmed||e.target===musicBtn)return;musicArmed=true;syncMusic()},{capture:true});
 document.addEventListener('visibilitychange',syncMusic);
+/* the welcome card: its click is the one browsers need before they will play the music */
+const welcome=document.getElementById('welcome');
+let welcomeOn=!location.hash.slice(1); /* someone arriving straight at a chapter skips it */
+function begin(){if(!welcomeOn)return;welcomeOn=false;welcome.classList.add('gone');musicArmed=true;syncMusic();setTimeout(()=>welcome.remove(),1000)}
+welcome.addEventListener('click',begin);
+addEventListener('keydown',e=>{if(welcomeOn){e.preventDefault();begin()}},{capture:true});
+if(welcomeOn)welcome.focus({preventScroll:true});else welcome.remove();
 addEventListener('hashchange',()=>setTimeout(syncMusic));
 addEventListener('hashchange',route);route();syncMusic();
 /* start over: forget both chapters' saves and lock Act 1 again */
