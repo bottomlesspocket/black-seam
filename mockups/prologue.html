@@ -227,6 +227,11 @@ function person(x,y,s,o,t){
  if(o.shawl){ctx.fillStyle=o.shawl;ctx.beginPath();ctx.moveTo(-34*w,-188);ctx.quadraticCurveTo(0,-176,34*w,-188);ctx.lineTo(0,-128);ctx.closePath();ctx.fill()}
  if(!o.skirt){ctx.fillStyle='#e6e0d2';ctx.beginPath();ctx.moveTo(-7,-198);ctx.lineTo(0,-180);ctx.lineTo(7,-198);ctx.fill();ctx.fillStyle='#16120f';ctx.fillRect(-2,-194,4,10)}
  if(o.chain){ctx.strokeStyle='#e0b45a';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-16*w,-138);ctx.quadraticCurveTo(0,-126,16*w,-138);ctx.stroke()}
+ /* a buttonhole flower on the lapel: Vane's red carnation */
+ if(o.flower){const fx=11*w,fy=-180;ctx.strokeStyle='#2e5a2a';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(fx-1,fy+3);ctx.lineTo(fx-3,fy+11);ctx.stroke();
+  ctx.fillStyle='#2e5a2a';ctx.beginPath();ctx.ellipse(fx-4,fy+8,2.6,1.2,-.6,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<7;i++){const a=i/7*Math.PI*2;ctx.fillStyle=i%2?'#a8182a':'#d02a3c';ctx.beginPath();ctx.arc(fx+Math.cos(a)*3.2,fy+Math.sin(a)*2.8,2.6,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='#e8485a';ctx.beginPath();ctx.arc(fx-.6,fy-.8,2.2,0,Math.PI*2);ctx.fill()}
  if(o.arms==='front'){rimFill(P(p=>{p.moveTo(-30*w,-186);p.quadraticCurveTo(-38*w,-150,-24,-124);p.lineTo(-14,-116);p.lineTo(-10,-126);p.quadraticCurveTo(-24*w,-150,-20*w,-176);p.closePath();p.moveTo(30*w,-186);p.quadraticCurveTo(38*w,-150,24,-124);p.lineTo(14,-116);p.lineTo(10,-126);p.quadraticCurveTo(24*w,-150,20*w,-176);p.closePath()}),coat,rim,-2,1);
   ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(-12,-118,5,4.5,0,0,Math.PI*2);ctx.ellipse(12,-118,5,4.5,0,0,Math.PI*2);ctx.fill()}
  else if(o.arms==='point'){rimFill(P(p=>{p.moveTo(-30*w,-186);p.quadraticCurveTo(-40*w,-150,-38*w,-108);p.lineTo(-30*w,-108);p.quadraticCurveTo(-30*w,-150,-22*w,-178);p.closePath();p.moveTo(24*w,-188);p.lineTo(76,-176);p.lineTo(76,-166);p.lineTo(24*w,-170);p.closePath()}),coat,rim,-2,1);
@@ -326,7 +331,7 @@ const LEDGER={
  bevan:['Josiah Bevan','Surveyor, thirty years with the firm. Died at his desk on Tuesday, between one sentence and the next.'],
  gwen:['Gwen Rees','Bevan’s daughter. A widow, at Pen-y-graig farm, Cwm Du, Glamorgan.'],
  dobbs:['Mr Dobbs','Coal factor on the Exchange. Can name a coal by the way it breaks.'],
- vane:['Septimus Vane','Agent of the Taff and Rhondda Coal Company. Buying leases up every valley in Glamorgan.'],
+ vane:['Septimus Vane','Agent of the Taff and Rhondda Coal Company. Buying leases up every valley in Glamorgan. Never without a red carnation.'],
  hatch:['Mrs Hatch','Pawnbroker, Leather Lane. Calls everybody Smith.'],
  ellis:['Mr Ellis','Law-writer, lodging over Mrs Hatch’s shop. Copies wills for Chancery Lane by day, and any hand you like by night. I have never seen his face.']};
 const SECRETS={
@@ -603,7 +608,7 @@ SC.office={title:'Bevan’s box',place:'9 Great George Street, Westminster · Se
   use:{coal:async()=>{await line('Tom','Is that for the stove, sir? Bit small.');await speak('No, Tom. It’s for later.')},watch:async()=>{await line('Tom','Nice watch, sir. Shame it don’t go.')},humbug:()=>say('Not where Tom can see it. He’d have it in his mouth before it left my hand.')}},
  {id:'stove',name:'Stove',x:296,y:556,w:84,h:144,wx:360,verbs:()=>[['Look',()=>say('Coal in September. Mr Grice says the damp gets into the drawings, and Mr Grice is always right.')]],
   use:{coal:()=>say('Burn it? Not in here. If it’s what I think, I want it whole, and I want a coal man to see it.')}},
- {id:'table',name:'My drafting table',x:430,y:516,w:166,h:120,wx:510,verbs:()=>[['Look',()=>say('Eleven years at this table. Other men’s mines, other men’s money, drawn very neatly.')],!F('drawer')?['Open drawer',openDrawer]:null]},
+ {id:'table',name:'My drafting table',x:430,y:516,w:166,h:120,wx:510,verbs:()=>[['Look',async()=>{await say('Eleven years at this table. Other men’s mines, other men’s money, drawn very neatly.');await say('On the board now, my ventilation plan for the Ystrad level, waiting for Mr Hallam to approve it.')}],!F('drawer')?['Open drawer',openDrawer]:null]},
  {id:'window',name:'Window',x:588,y:108,w:304,h:466,wx:740,verbs:()=>[['Look',()=>say('Rain on Westminster. The clock tower is a grey ghost today.')]]},
  {id:'map',name:'Map of the South Wales coalfield',x:908,y:148,w:224,h:190,wx:1020,verbs:()=>[['Look',()=>say('The Geological Survey’s map. A great black basin of coal from Pontypool to St Brides Bay, and the valleys cut into it like fingers.')]]},
  {id:'bevan',name:'Mr Bevan’s desk',x:926,y:500,w:212,h:200,wx:1010,verbs:()=>[['Look',()=>say('Thirty years at this desk. He died at it on Tuesday, between one sentence and the next. Nobody has sat there since.')],!F('searched')?['Clear the desk',searchDesk]:null]},
@@ -687,7 +692,7 @@ ctx.save();ctx.beginPath();ctx.rect(-600,-400,2800,450);ctx.clip();
  /* beadle, Dobbs, Vane */
  person(318,712,.84,{id:'beadle',coat:'#1f2a4a',rim:'#8a94b0',braid:1,hat:'cocked',hatC:'#151a2a',whiskers:'#6a5a4a',ph:.4},t);
  person(904,736,.86,{id:'dobbs',coat:'#2a2420',rim:'#b09670',stout:1,w:1.12,hat:'top',whiskers:'#9a8a78',chain:1,flip:1,ph:1.1},t);
- person(1350,734,.92,{id:'vane',coat:'#121012',rim:'#a89a80',w:.88,hat:'top',chain:1,flip:1,ph:2.4,skin:'#d8b294'},t);
+ person(1350,734,.92,{id:'vane',coat:'#121012',rim:'#a89a80',w:.88,hat:'top',chain:1,flower:1,flip:1,ph:2.4,skin:'#d8b294',whiskers:'#8a7a68'},t);
  ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<3;i++){const x=420+i*380+(reduce?0:Math.sin(t*.0003+i)*20);ctx.fillStyle=lg(x,0,x+160,700,['rgba(255,244,214,.10)','rgba(255,244,214,0)']);ctx.beginPath();ctx.moveTo(x,-40);ctx.lineTo(x+90,-40);ctx.lineTo(x+260,760);ctx.lineTo(x+120,760);ctx.fill()}ctx.restore();
  ctx.restore();
  /* floor with compass */
@@ -709,7 +714,7 @@ SC.exchange={title:'The Coal Exchange',place:'Lower Thames Street, City of Londo
  {id:'crowd',name:'Factors and shippers',x:520,y:560,w:300,h:150,wx:620,verbs:()=>[['Look',()=>say('Factors, fitters and shipowners, all in black, all shouting. Every fire in London is priced in this room.')],['Listen',()=>say('“…the Admiralty’s taking Welsh at Portsmouth again…” “…Vane’s been to Cardiff three times this month…”')]]},
  {id:'floor',name:'The compass floor',x:300,y:770,w:1000,h:90,wx:800,verbs:()=>[['Look',()=>say('A mariner’s compass in inlaid wood, thousands of pieces. Every point of it leads to money.')]]},
  {id:'dobbs',name:'Mr Dobbs, coal factor',x:850,y:520,w:110,h:220,wx:800,needs:'admitted',verbs:()=>[['Talk',talkDobbs]],use:{hlletter:deliver,coal:showCoal,notebook:()=>say('Show him the notebook? I might as well hand him the farm.'),forged:()=>say('Not to a coal man.')}},
- {id:'vane',name:'A tall man in black',x:1300,y:510,w:110,h:230,wx:1250,needs:'admitted',verbs:()=>[['Talk',talkVane]],use:{coal:()=>say('Not to him. Not to him of all people.'),notebook:()=>say('No.')}}
+ {id:'vane',name:'The man with the carnation',x:1300,y:510,w:110,h:230,wx:1250,needs:'admitted',verbs:()=>[['Talk',talkVane]],use:{coal:()=>say('Not to him. Not to him of all people.'),notebook:()=>say('No.')}}
  ]};
 async function talkBeadle(){
  if(F('admitted')){await line('The beadle','Mr Dobbs is by the Hetton board, sir.');return}
@@ -735,7 +740,8 @@ async function showCoal(){
  await line('Mr Dobbs','That’s Welsh steam coal, Mr Crane, and good of its kind. Burns hot, and hardly any smoke.');
  await line('Mr Dobbs','The Admiralty takes all it can get. A warship can’t hide behind its own smoke, and the best Welsh raises steam faster than anything from Newcastle.');
  await line('Mr Dobbs','If you know where there’s a seam of that, you’re either a rich man or a dead one.');
- await line('Mr Dobbs','See the long fellow by the pillar? Septimus Vane. Taff and Rhondda Coal Company. Buying leases up every valley in Glamorgan.');
+ await line('Mr Dobbs','See the long fellow by the pillar, with the red carnation? Septimus Vane. Taff and Rhondda Coal Company. Buying leases up every valley in Glamorgan.');
+ await line('Mr Dobbs','A fresh one in his coat every morning, winter and summer. Hothouse flowers in January. That’s what the Taff and Rhondda pays its men.');
  await line('Mr Dobbs','He’d pay you for that lump. Then he’d make sure nobody paid you for anything again.');
  flag('valued');addLedger('vane');await speak('Rich man, then.')}
 async function talkVane(){

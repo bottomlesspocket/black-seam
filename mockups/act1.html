@@ -228,6 +228,11 @@ function person(x,y,s,o,t){
  if(o.shawl){ctx.fillStyle=o.shawl;ctx.beginPath();ctx.moveTo(-34*w,-188);ctx.quadraticCurveTo(0,-176,34*w,-188);ctx.lineTo(0,-128);ctx.closePath();ctx.fill()}
  if(!o.skirt){ctx.fillStyle='#e6e0d2';ctx.beginPath();ctx.moveTo(-7,-198);ctx.lineTo(0,-180);ctx.lineTo(7,-198);ctx.fill();ctx.fillStyle='#16120f';ctx.fillRect(-2,-194,4,10)}
  if(o.chain){ctx.strokeStyle='#e0b45a';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-16*w,-138);ctx.quadraticCurveTo(0,-126,16*w,-138);ctx.stroke()}
+ /* a buttonhole flower on the lapel: Vane's red carnation */
+ if(o.flower){const fx=11*w,fy=-180;ctx.strokeStyle='#2e5a2a';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(fx-1,fy+3);ctx.lineTo(fx-3,fy+11);ctx.stroke();
+  ctx.fillStyle='#2e5a2a';ctx.beginPath();ctx.ellipse(fx-4,fy+8,2.6,1.2,-.6,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<7;i++){const a=i/7*Math.PI*2;ctx.fillStyle=i%2?'#a8182a':'#d02a3c';ctx.beginPath();ctx.arc(fx+Math.cos(a)*3.2,fy+Math.sin(a)*2.8,2.6,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='#e8485a';ctx.beginPath();ctx.arc(fx-.6,fy-.8,2.2,0,Math.PI*2);ctx.fill()}
  if(o.arms==='front'){rimFill(P(p=>{p.moveTo(-30*w,-186);p.quadraticCurveTo(-38*w,-150,-24,-124);p.lineTo(-14,-116);p.lineTo(-10,-126);p.quadraticCurveTo(-24*w,-150,-20*w,-176);p.closePath();p.moveTo(30*w,-186);p.quadraticCurveTo(38*w,-150,24,-124);p.lineTo(14,-116);p.lineTo(10,-126);p.quadraticCurveTo(24*w,-150,20*w,-176);p.closePath()}),coat,rim,-2,1);
   ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(-12,-118,5,4.5,0,0,Math.PI*2);ctx.ellipse(12,-118,5,4.5,0,0,Math.PI*2);ctx.fill()}
  else if(o.arms==='point'){rimFill(P(p=>{p.moveTo(-30*w,-186);p.quadraticCurveTo(-40*w,-150,-38*w,-108);p.lineTo(-30*w,-108);p.quadraticCurveTo(-30*w,-150,-22*w,-178);p.closePath();p.moveTo(24*w,-188);p.lineTo(76,-176);p.lineTo(76,-166);p.lineTo(24*w,-170);p.closePath()}),coat,rim,-2,1);
@@ -322,7 +327,7 @@ const ITEMS={
 const LEDGER={
  bevan:['Josiah Bevan','Surveyor, thirty years with Hallam & Pike. Found the seam in 1851 and told no one.'],
  gwen:['Gwen Rees','Bevan’s daughter, widowed, farming Pen-y-graig alone. Plays the harmonium at Bethel.'],
- vane:['Septimus Vane','Agent of the Taff and Rhondda Coal Company. Buying leases up every valley in Glamorgan.'],
+ vane:['Septimus Vane','Agent of the Taff and Rhondda Coal Company. Buying leases up every valley in Glamorgan. Never without a red carnation.'],
  pugh:['Pugh, the Black Lion','Landlord. Hears everything, and keeps a slate of who owes what.'],
  will:['Will Jenkins','Sixteen, sits on the wall by the inn. English for a penny, gossip for nothing.'],
  dai:['Dai the smith','Big, slow, and owed a pair of tongs.'],
@@ -788,7 +793,7 @@ const FIG={
  morgan:{coat:'#4a4234',rim:'#a09478',hat:'cap',hatC:'#2a2620',beard:'#6a5a48',skin:'#c99678',w:1.05},
  pugh:{coat:'#3a2e24',rim:'#c8925a',apron:1,neck:1,burns:'#5a3e2a',tache:'#5a3e2a',hair:'#6a4a32',skin:'#d29a78',w:1.12,stout:1,arms:'front'},
  pryce:{coat:'#141210',rim:'#8a8478',hair:'#9a948a',skin:'#d6ad8c',arms:'front'},
- vane:{coat:'#121012',rim:'#a89a80',w:.88,hat:'top',chain:1,skin:'#d8b294',whiskers:'#8a7a68'}};
+ vane:{coat:'#121012',rim:'#a89a80',w:.88,hat:'top',chain:1,flower:1,skin:'#d8b294',whiskers:'#8a7a68'}};
 for(const k in FIG)FIG[k].id=k;
 const VOICE={'Stationmaster':'stationmaster','Will Jenkins':'will','Dai':'dai','Gwen Rees':'gwen','Morgan':'morgan','Pugh':'pugh','Rev. Owain Pryce':'pryce','Septimus Vane':'vane','Old Evan':'evan','Old Ianto':'ianto'};
 
@@ -1755,6 +1760,7 @@ async function vaneArrives(){
  /* runs inside the caller's run(), so it must not start its own */
  flag('vaneTrain');trainX=1400;subEl.classList.remove('on');await sleep(reduce?100:3400);
  await say('A first-class carriage. On the Taff Vale. In Cwm Du.');
+ await say('A tall man in black, with a red carnation in his coat. I’ve seen that flower before, at the Coal Exchange.');
  await line('Septimus Vane','Mr Crane, isn’t it?');
  await line('Septimus Vane','Hallam’s draughtsman, from the Coal Exchange. I never forget a face.');await line('Septimus Vane','And Mr Dobbs does love to talk about a good piece of Welsh coal.');
  await line('Septimus Vane','Your stationmaster is a most obliging man. Half a crown, and he telegraphs me the name of every stranger who gets off at Cwm Du.');
