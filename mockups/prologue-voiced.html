@@ -1128,19 +1128,29 @@ async function intro(){
  await speak('Paddington is not on the way to Lower Thames Street, Mr Grice.');
  await line('Mr Grice','Then you had better start walking, Mr Crane.');
  await say('Thirty years at that desk, and they box him up in an afternoon.')}
-/* sound must be playing before the intro paragraph shows. If the click that opened the chapter
-   was enough for the browser, go straight on; if not, ask for a click first and start the sound with it */
+/* the welcome card. Its click is what lets the browser play sound, so the sound is already running
+   under the intro paragraph. A saved game is offered here: Continue goes straight back in, Start again
+   wipes the save and shows the intro. A new game skips this card if the browser already allows sound */
 function titleCard(cont){
  audio.start();ov.innerHTML='';ov.classList.add('on');
- setTimeout(()=>{if(audio.running){syncSnd();introCard(cont);return}
-  ov.innerHTML=`<div class="card gate"><small>Black Seam · Prologue</small><h1>Welcome to the prologue</h1><p class="pulse">Click anywhere to begin</p></div>`;
-  const go=e=>{if(e){e.preventDefault();e.stopPropagation()}ov.removeEventListener('click',go);removeEventListener('keydown',go,true);audio.start();syncSnd();introCard(cont)};
-  ov.addEventListener('click',go);addEventListener('keydown',go,true)},250)}
-function introCard(cont){
- ov.innerHTML=`<div class="card"><small>Black Seam · Prologue</small><h1>Bevan’s box</h1><p>London, September 1869. Elias Crane has drawn other men’s mines for eleven years. On Tuesday Josiah Bevan, the old surveyor at the next desk, died at his work. This afternoon his belongings are being packed into a tea chest for his daughter.</p><div class="row"><button class="btn" id="go">${cont?'Continue':'Begin'}</button>${cont?'<button class="btn" id="restart">Start again</button>':''}</div><p style="font-size:15px">Click or tap to walk and to use things. Hold space, or the magnifier on touch screens, to show what you can interact with.</p></div>`;
- ov.classList.add('on');audio.start();syncSnd();
- document.getElementById('go').onclick=()=>{ov.classList.remove('on');audio.start();syncSnd();if(!cont)run(intro)};
- const r=document.getElementById('restart');if(r)r.onclick=()=>{try{localStorage.removeItem(SAVE)}catch(_){}G=fresh();enterScene('office');ui();ov.classList.remove('on');audio.start();syncSnd();run(intro)}}
+ setTimeout(()=>{
+  if(!cont&&audio.running){syncSnd();introCard();return}
+  const once=[];const off=()=>{for(const[t,ev,fn,c]of once)t.removeEventListener(ev,fn,c)};
+  const on=(t,ev,fn,c)=>{t.addEventListener(ev,fn,c);once.push([t,ev,fn,c])};
+  if(cont){
+   ov.innerHTML=`<div class="card gate"><small>Black Seam · Prologue</small><h1>Welcome to the prologue</h1><p>Your place is saved.</p><div class="row"><button class="btn" id="go">Continue</button><button class="btn" id="restart">Start again</button></div></div>`;
+   document.getElementById('go').onclick=e=>{e.stopPropagation();off();ov.classList.remove('on');audio.start();syncSnd()};
+   document.getElementById('restart').onclick=e=>{e.stopPropagation();off();try{localStorage.removeItem(SAVE)}catch(_){}G=fresh();enterScene('office');ui();audio.start();syncSnd();introCard()};
+   document.getElementById('go').focus({preventScroll:true})}
+  else{
+   ov.innerHTML=`<div class="card gate"><small>Black Seam · Prologue</small><h1>Welcome to the prologue</h1><p class="pulse">Click anywhere to begin</p></div>`;
+   const go=e=>{if(e){e.preventDefault();e.stopPropagation()}off();audio.start();syncSnd();introCard()};
+   on(ov,'click',go);on(window,'keydown',go,true)}},250)}
+/* the intro paragraph, read with the sound already playing */
+function introCard(){
+ ov.innerHTML=`<div class="card"><small>Black Seam · Prologue</small><h1>Bevan’s box</h1><p>London, September 1869. Elias Crane has drawn other men’s mines for eleven years. On Tuesday Josiah Bevan, the old surveyor at the next desk, died at his work. This afternoon his belongings are being packed into a tea chest for his daughter.</p><div class="row"><button class="btn" id="go">Begin</button></div><p style="font-size:15px">Click or tap to walk and to use things. Hold space, or the magnifier on touch screens, to show what you can interact with.</p></div>`;
+ ov.classList.add('on');
+ document.getElementById('go').onclick=()=>{ov.classList.remove('on');audio.start();syncSnd();run(intro)}}
 
 /* ================= walking & input ================= */
 function walkTo(x){return new Promise(res=>{const [a,b]=scene.walk;let lim=b;const gate=scene.gate&&scene.gate();if(gate)lim=Math.min(lim,gate);
